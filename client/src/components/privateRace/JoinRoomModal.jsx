@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import styled from "styled-components"
 import { socket } from '../../Socket'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setJoiningRoom, setRoomID } from '../../redux/privateSlice'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faX } from '@fortawesome/free-solid-svg-icons'
 const JoinRoomModal = ({ }) => {
   const dispatch = useDispatch()
-
+  const typingMode = useSelector((state) => state.typing.typingMode)
   const [errMessage, setErrMessage] = useState("")
 
   let id = ""
@@ -21,15 +21,6 @@ const JoinRoomModal = ({ }) => {
 
   useEffect(() => {
     socket.on("successfuly_joined_private_room", (roomID) => {
-      console.log("joined room chat")
-      socket.emit("set_user_data", {
-        username: "",
-        wpm: 0,
-        currentWord: "",
-        percentage: 0,
-        id: "",
-        roomOwner: false,
-      })
       dispatch(setRoomID(roomID))
     })
 
@@ -40,8 +31,17 @@ const JoinRoomModal = ({ }) => {
 
 
   const joinRoom = () => {
-    console.log(id)
     socket.emit("join_private_room", id)
+
+    const userData = {
+      username: "",
+      wpm: 0,
+      currentWord: "",
+      percentage: 0,
+      id: "",
+      roomOwner: false,
+    }
+    socket.emit("join_room", [id, typingMode, userData])
   }
 
   const onCancel = () => {

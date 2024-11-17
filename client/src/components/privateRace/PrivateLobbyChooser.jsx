@@ -13,10 +13,11 @@ const PrivateLobbyChooser = () => {
   const joiningRoom = useSelector((state) => state.private.joiningRoom)
   const roomID = useSelector((state) => state.private.roomID)
 
+  const TYPING_MODE = 2;
+
 
   const onCreateRoom = () => {
     socket.emit("create_private_room")
-
   }
 
   const onJoinRoom = () => {
@@ -28,15 +29,17 @@ const PrivateLobbyChooser = () => {
     socket.on("created_room", (id) => {
       dispatch(setRoomOwner(true))
       dispatch(setRoomID(id))
-      socket.emit("join_private_room", id)
-      socket.emit("set_user_data", {
+
+      const userData = {
         username: "",
         wpm: 0,
         currentWord: "",
         percentage: 0,
         id: "",
-        roomOwner: true
-      })
+        roomOwner: false,
+      }
+
+      socket.emit("join_room", [id, TYPING_MODE, userData])
     })
 
 

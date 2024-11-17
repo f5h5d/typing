@@ -10,6 +10,8 @@ const PrivateLobby = () => {
   const roomID = useSelector((state) => state.private.roomID)
   const roomOwner = useSelector((state) => state.private.roomOwner)
 
+  const typingMode = useSelector((state) => state.typing.typingMode)
+
   useEffect(() => {
     socket.on("initialize_user_id", (data) => {
       dispatch(setSocketID(data))
@@ -25,14 +27,16 @@ const PrivateLobby = () => {
     });
 
     socket.on("initialize_other_users_data", (data) => {
-      console.log(data)
-      dispatch(setOtherPlayersData(data));
+      const users = {};
+      for (let x in data) { // loop through and keep everyone but the user 
+        if(data[x].id !== socket.id) users[data[x].id] = data[x]
+      }
+      dispatch(setOtherPlayersData(users));
     })
 
 
     socket.on("started_game", () => {
       dispatch(setStartPrivateGame(true))
-      console.log("hey chat")
       socket.emit("track_user", roomID)
     })
   
@@ -43,12 +47,9 @@ const PrivateLobby = () => {
 
 
   const onStartClick = () => {
-    // if (Object.keys(otherPlayersData).length > 0) {
-      socket.emit("start_game", roomID)
+      socket.emit("start_game", [typingMode, roomID])
       socket.emit("track_user", roomID)
       dispatch(setStartPrivateGame(true));
-
-    // }
   }
   
   return (
