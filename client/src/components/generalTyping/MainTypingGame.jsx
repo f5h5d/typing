@@ -1,16 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import 'react-simple-keyboard/build/css/index.css';
-import TypingTracker from "../generalTyping/TypingTracker";
-import TypingSection from "../generalTyping/TypingSection";
-import PercentageComplete from "../generalTyping/PercentageComplete";
+import TypingTracker from "./TypingTracker";
+import TypingSection from "./TypingSection";
+import PercentageComplete from "./PercentageComplete";
 import { useDispatch, useSelector} from "react-redux";
-import NumberInfo from "../generalTyping/NumberInfo";
+import NumberInfo from "./NumberInfo";
 import axios from "axios";
 import { reset, setStartTime, setTypingBackgroundInfo, setTypingMode, setTypingText } from "../../redux/typingSlice";
 import OtherPlayersPercentageComplete from "../multiplayer/OtherPlayersPercentageComplete";
 import { setHasRaceStarted, setIsMultiplayer, setOtherPlayersData, setPreRaceTimer, setRacePlacement, setSocketID } from "../../redux/multiplayerSlice";
 import { socket } from "../../Socket";
+import OptionSelector from "../sandbox/OptionSelector";
 
 const PrivateRaceGame = () => {
   const dispatch = useDispatch()
@@ -19,14 +20,12 @@ const PrivateRaceGame = () => {
   const wordsTyped = useSelector((state) => state.typing.wordsTyped)
   const typingText = useSelector((state) => state.typing.typingText)
   const wpmRecord = useSelector((state) => state.typing.wpmRecord)
-  const startTime = useSelector((state) => state.typing.startTime)
+  const typingMode = useSelector((state) => state.typing.typingMode)
   const typingRef = useRef(null);
 
-  const mode = useSelector((state) => state.multiplayer.mode);
   const preRaceTimer = useSelector((state) => state.multiplayer.preRaceTimer)
   const hasRaceStarted = useSelector((state) => state.multiplayer.hasRaceStarted)
 
-  const roomOwner = useSelector((state) => state.private.roomOwner)
   const percentage = (wordsTyped / typingText.split(" ").length) * 100;
 
   // const startTimeRef = startTime
@@ -57,7 +56,6 @@ const PrivateRaceGame = () => {
     })
 
     socket.on("pre_game_timer", (data) => {
-      console.log(data)
       dispatch(setPreRaceTimer(data))
       if (data == -1) {
 
@@ -78,7 +76,6 @@ const PrivateRaceGame = () => {
     })
 
     socket.on("user_finished_position", (data) => {
-      console.log(data)
       dispatch(setRacePlacement(data));
     })
   
@@ -120,7 +117,7 @@ const PrivateRaceGame = () => {
         </PostTypingContainer> 
         :
         <Container>
-          {!hasRaceStarted ? (
+          {!hasRaceStarted && typingMode !== 0 ? (
             <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
           ) : ""}
             <PercentageCompleteSection>
@@ -132,6 +129,8 @@ const PrivateRaceGame = () => {
             <TypingSection typingRef={typingRef}/>
           </TypingContainer>
           <Options>
+
+            {typingMode == 0 ? <OptionSelector typingRef={typingRef}/> : ""}
           </Options>
           
         </Container>
@@ -204,10 +203,6 @@ const PercentageCompleteSection = styled.div`
   overflow-y: auto;
   margin-top: 50px;
   margin-bottom: 50px;
-`
-
-const RightSideContainer = styled.div`
-
 `
 
 

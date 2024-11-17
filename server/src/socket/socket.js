@@ -76,6 +76,8 @@ module.exports = (io) => {
       if (room.preGameTimer < PREGAME_TIMER) {
         socket.emit("initialize_typing_quote", roomsTextCache.get(roomID))
       }
+
+      socket.emit("pre_game_timer", room.preGameTimer); // give the user the current pre-game-timer
     });
   
   
