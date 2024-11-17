@@ -11,6 +11,8 @@ import { reset, setStartTime, setTypingBackgroundInfo, setTypingMode, setTypingT
 import OtherPlayersPercentageComplete from "../components/multiplayer/OtherPlayersPercentageComplete";
 import { setHasRaceStarted, setIsMultiplayer, setOtherPlayersData, setPreRaceTimer, setRacePlacement, setSocketID } from "../redux/multiplayerSlice";
 import { socket } from "../Socket";
+import PrivateRaceGame from "../components/privateRace/PrivateRaceGame";
+import { setRoomID } from "../redux/privateSlice";
 
 const Multiplayer = () => {
   const dispatch = useDispatch()
@@ -28,6 +30,10 @@ const Multiplayer = () => {
 
   const percentage = (wordsTyped / typingText.split(" ").length) * 100;
 
+  const typingMode = useSelector((state) => state.typing.typingMode)
+
+  const roomID = useSelector((state) => state.private.roomID)
+
   // const startTimeRef = startTime
 
   useEffect(() => {
@@ -36,127 +42,139 @@ const Multiplayer = () => {
   }, [])
 
   useEffect(() => {
-    socket.on("initialize_user_id", (data) => {
-      dispatch(setSocketID(data))
-    })
-    socket.on("initialize_user_data_for_others", (data) => {
-      const users = {};
-      for (let x in data) { // loop through and keep everyone but the user 
-        if(data[x].id !== socket.id) users[data[x].id] = data[x]
-      }
-      dispatch(setOtherPlayersData(users));
-    });
-
-    socket.on("initialize_other_users_data", (data) => {
-      dispatch(setOtherPlayersData(data));
-    })
-
-    socket.on("initialize_typing_quote", (data) => {
-      dispatch(setTypingText(data.words))
-      dispatch(setTypingBackgroundInfo(data))
-      typingRef.current.value = ""
-      dispatch(reset())
-
-    })
-
-    socket.on("pre_game_timer", (data) => {
-      dispatch(setPreRaceTimer(data))
-      if (data == -1) {
-
-        dispatch(setHasRaceStarted(true));
-        console.log(true)
-        setTimeout(() => {
-          dispatch(setStartTime(Date.now()))
-        }, 150)
-      };
-    })
-
-    socket.on("update_users_data", (data) => {
-      const users = {};
-      for (let x in data) { // loop through and keep everyone but the user 
-        if(data[x].id !== socket.id) users[data[x].id] = data[x]
-      }
-
-      dispatch(setOtherPlayersData(users));
-    })
-
-    socket.on("user_finished_position", (data) => {
-      dispatch(setRacePlacement(data));
-    })
-  
-    return () => {
-      socket.off("initalize_users_data");
-    };
-  }, [socket, dispatch]);
-
-
-  useEffect(() => {
-    if (socket.id == undefined) return;
-    socket.emit("update_users_scores", {
-      username: socket.id,
-      wpm: wpm,
-      currentWord: typingText.split(" ")[wordsTyped],
-      percentage: percentage,
-      id: socket.id
-    });
-  }, [wpmRecord])
-
-  useEffect(() => {
-    if (socket.id == undefined) return;
-    socket.emit("user_finished_test", {
-      username: socket.id,
-      wpm: wpm,
-      currentWord: "",
-      percentage: 100,
-      id: socket.id
-    });
-  }, [finishedTest])
-
-
-
-  useEffect(() => {
     socket.connect();
-    socket.emit("join_room")
-    socket.emit("set_user_data", {
+
+    const userData = {
       username: "",
       wpm: 0,
       currentWord: typingText.split(" ")[0],
       percentage: 0,
       id: ""
-    })
+    }
 
+    socket.emit("join_room", [0, 1, userData])
     return () => {
-      socket.off("set_user_data")
       socket.disconnect();
     };
   }, []);
 
-  return (
-    <>
-      {finishedTest ? 
 
-        <PostTypingContainer>
-          <NumberInfo />
-        </PostTypingContainer> 
-        :
-        <Container>
-          {!hasRaceStarted ? (
-            <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
-          ) : ""}
-            <PercentageCompleteSection>
-            <PercentageComplete />
-            <OtherPlayersPercentageComplete typingRef={typingRef} />
-          </PercentageCompleteSection>
-          <TypingContainer>
-            <TypingTracker />
-            <TypingSection typingRef={typingRef}/>
-          </TypingContainer>
-          <Options>
-          </Options>
+  useEffect(() => {
+    socket.on("get_room_id", (id) => {
+      setRoomID(id)
+      socket.emit("track_user", id)
+    })
+
+    socket.on("tell_user_to_start_game", (roomID) => {
+      socket.emit("start_game", [1, roomID])
+    })
+
+  }, [dispatch, socket])
+
+  // useEffect(() => {
+  //   socket.on("initialize_user_id", (data) => {
+  //     dispatch(setSocketID(data))
+  //   })
+  //   socket.on("initialize_user_data_for_others", (data) => {
+  //     const users = {};
+  //     for (let x in data) { // loop through and keep everyone but the user 
+  //       if(data[x].id !== socket.id) users[data[x].id] = data[x]
+  //     }
+  //     dispatch(setOtherPlayersData(users));
+  //   });
+
+  //   socket.on("initialize_other_users_data", (data) => {
+  //     dispatch(setOtherPlayersData(data));
+  //   })
+
+  //   socket.on("initialize_typing_quote", (data) => {
+  //     dispatch(setTypingText(data.words))
+  //     dispatch(setTypingBackgroundInfo(data))
+  //     typingRef.current.value = ""
+  //     dispatch(reset())
+
+  //   })
+
+  //   socket.on("pre_game_timer", (data) => {
+  //     dispatch(setPreRaceTimer(data))
+  //     if (data == -1) {
+
+  //       dispatch(setHasRaceStarted(true));
+  //       console.log(true)
+  //       setTimeout(() => {
+  //         dispatch(setStartTime(Date.now()))
+  //       }, 150)
+  //     };
+  //   })
+
+  //   socket.on("update_users_data", (data) => {
+  //     const users = {};
+  //     for (let x in data) { // loop through and keep everyone but the user 
+  //       if(data[x].id !== socket.id) users[data[x].id] = data[x]
+  //     }
+
+  //     dispatch(setOtherPlayersData(users));
+  //   })
+
+  //   socket.on("user_finished_position", (data) => {
+  //     dispatch(setRacePlacement(data));
+  //   })
+  
+  //   return () => {
+  //     socket.off("initalize_users_data");
+  //   };
+  // }, [socket, dispatch]);
+
+
+  // useEffect(() => {
+  //   if (socket.id == undefined) return;
+  //   socket.emit("update_users_scores", {
+  //     username: socket.id,
+  //     wpm: wpm,
+  //     currentWord: typingText.split(" ")[wordsTyped],
+  //     percentage: percentage,
+  //     id: socket.id
+  //   });
+  // }, [wpmRecord])
+
+  // useEffect(() => {
+  //   if (socket.id == undefined) return;
+  //   socket.emit("user_finished_test", {
+  //     username: socket.id,
+  //     wpm: wpm,
+  //     currentWord: "",
+  //     percentage: 100,
+  //     id: socket.id
+  //   });
+  // }, [finishedTest])
+
+  return (
+//     <>
+//       {finishedTest ? 
+
+//         <PostTypingContainer>
+//           <NumberInfo />
+//         </PostTypingContainer> 
+//         :
+//         <Container>
+//           {!hasRaceStarted ? (
+//             <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
+//           ) : ""}
+//             <PercentageCompleteSection>
+//             <PercentageComplete />
+//             <OtherPlayersPercentageComplete typingRef={typingRef} />
+//           </PercentageCompleteSection>
+//           <TypingContainer>
+//             <TypingTracker />
+//             <TypingSection typingRef={typingRef}/>
+//           </TypingContainer>
+//           <Options>
+//           </Options>
           
-        </Container>
-}
-    </>
+//         </Container>
+// }
+//     </>
+    <PrivateRaceGame />
   );
 };
 

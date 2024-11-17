@@ -18,9 +18,9 @@ const PrivateRace = () => {
   const reset = useSelector((state) => state.typing.reset);
 
 
+  const typingMode = useSelector((state) => state.typing.typingMode)
   
   useEffect(() => {
-    console.log(roomID)
     dispatch(setIsMultiplayer(true));
     dispatch(setTypingMode(2))
   }, [])

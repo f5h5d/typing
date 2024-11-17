@@ -40,6 +40,22 @@ const PrivateRaceGame = () => {
 
     })
 
+    socket.on("initialize_user_data_for_others", (data) => {
+      const users = {};
+      for (let x in data) { // loop through and keep everyone but the user 
+        if(data[x].id !== socket.id) users[data[x].id] = data[x]
+      }
+      dispatch(setOtherPlayersData(users));
+    });
+
+    socket.on("initialize_other_users_data", (data) => {
+      const users = {};
+      for (let x in data) { // loop through and keep everyone but the user 
+        if(data[x].id !== socket.id) users[data[x].id] = data[x]
+      }
+      dispatch(setOtherPlayersData(users));
+    })
+
     socket.on("pre_game_timer", (data) => {
       console.log(data)
       dispatch(setPreRaceTimer(data))
