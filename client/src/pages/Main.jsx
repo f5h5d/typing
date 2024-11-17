@@ -6,8 +6,9 @@ import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import { Link } from "react-router-dom"
 import axios from 'axios';
-import { setMode } from '../redux/multiplayerSlice';
+import { setLookingForRoom, setMode } from '../redux/multiplayerSlice';
 import { useDispatch } from 'react-redux';
+import { GAME_MODES } from '../constants';
 const Main = () => {
   const dispatch = useDispatch()
 
@@ -36,7 +37,7 @@ const Main = () => {
             <div className="title">Multiplayer - Quotes</div>
           </div>
           <div className="right-side">
-          <Link to="/multiplayer" onClick={() => dispatch(setMode(0))} className="button screw-driver-wrench">PLAY</Link>
+          <Link to="/multiplayer" onClick={() => { dispatch(setMode(GAME_MODES.SANDBOX)); dispatch(setLookingForRoom(true))}}  className="button screw-driver-wrench">PLAY</Link>
           </div>
         </Section>
         <Section>

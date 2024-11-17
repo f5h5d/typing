@@ -8,6 +8,7 @@ import PrivateLobby from '../components/privateRace/PrivateLobby'
 import { setIsMultiplayer } from '../redux/multiplayerSlice'
 import { setTypingMode } from '../redux/typingSlice'
 import { setStartPrivateGame } from '../redux/privateSlice'
+import { GAME_MODES } from '../constants'
 
 
 const PrivateRace = () => {
@@ -18,7 +19,7 @@ const PrivateRace = () => {
   
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
-    dispatch(setTypingMode(2))
+    dispatch(setTypingMode(GAME_MODES.PRIVATE))
   }, [])
 
   useEffect(() => {

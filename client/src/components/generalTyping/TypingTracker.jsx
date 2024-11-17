@@ -122,7 +122,6 @@ const TypingTracker = () => {
         const lettersTyped = typingTextRef.current.split(" ").slice(0,wordsTypedRef.current).join(" ").length;
         const newWpm = Math.round((lettersTyped / 5) / ((Date.now() - startTimeRef.current)/60000));
         dispatch(setWpm(newWpm))
-        console.log((Date.now() - startTimeRef.current)/1000)
         dispatch(setWpmRecord([...wpmRecordRef.current, {time: Math.trunc((Date.now() - startTimeRef.current)/1000), wpm: newWpm, mistakes: mistakesRef.current}]))
         deltaTime = Date.now();
       }

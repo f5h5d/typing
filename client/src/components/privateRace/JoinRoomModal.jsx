@@ -42,6 +42,7 @@ const JoinRoomModal = ({ }) => {
       roomOwner: false,
     }
     socket.emit("join_room", [id, typingMode, userData])
+    dispatch(setStartPrivateGame(true));
   }
 
   const onCancel = () => {

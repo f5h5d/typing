@@ -99,6 +99,7 @@ module.exports = (io) => {
               roomsTextCache.set(roomID, response.data)
             }
             io.to(roomID).emit("initialize_typing_quote", response.data)
+            io.emit("initialize_typing_quote", response.data)
           })
         };
   
@@ -144,6 +145,19 @@ module.exports = (io) => {
           room.usersData[user].percentage = 0;
         })
         socket.to(roomID).emit("users_back_to_lobby")
+      })
+
+      socket.on("reset_game_values", (roomID) => {
+        const room = privateRooms.get(roomID)
+        room.preGameTimer = PREGAME_TIMER;
+        room.usersCompleted = [];
+        privateRoomTextMap.delete(roomID)
+  
+  
+        Object.keys(room.usersData).map((user) => {
+          room.usersData[user].wpm = 0;
+          room.usersData[user].percentage = 0;
+        })
       })
     })
   

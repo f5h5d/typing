@@ -7,11 +7,12 @@ import PercentageComplete from "./PercentageComplete";
 import { useDispatch, useSelector} from "react-redux";
 import NumberInfo from "./NumberInfo";
 import axios from "axios";
-import { reset, setStartTime, setTypingBackgroundInfo, setTypingMode, setTypingText } from "../../redux/typingSlice";
+import { reset, setStartTime, setTypingBackgroundInfo, setTypingText } from "../../redux/typingSlice";
 import OtherPlayersPercentageComplete from "../multiplayer/OtherPlayersPercentageComplete";
 import { setHasRaceStarted, setIsMultiplayer, setOtherPlayersData, setPreRaceTimer, setRacePlacement, setSocketID } from "../../redux/multiplayerSlice";
 import { socket } from "../../Socket";
 import OptionSelector from "../sandbox/OptionSelector";
+import { GAME_MODES } from "../../constants";
 
 const PrivateRaceGame = () => {
   const dispatch = useDispatch()
@@ -27,8 +28,6 @@ const PrivateRaceGame = () => {
   const hasRaceStarted = useSelector((state) => state.multiplayer.hasRaceStarted)
 
   const percentage = (wordsTyped / typingText.split(" ").length) * 100;
-
-  // const startTimeRef = startTime
 
   useEffect(() => {
     socket.on("initialize_typing_quote", (data) => {
@@ -117,7 +116,7 @@ const PrivateRaceGame = () => {
         </PostTypingContainer> 
         :
         <Container>
-          {!hasRaceStarted && typingMode !== 0 ? (
+          {!hasRaceStarted && typingMode !== GAME_MODES.SANDBOX ? (
             <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
           ) : ""}
             <PercentageCompleteSection>
@@ -130,7 +129,7 @@ const PrivateRaceGame = () => {
           </TypingContainer>
           <Options>
 
-            {typingMode == 0 ? <OptionSelector typingRef={typingRef}/> : ""}
+            {typingMode == GAME_MODES.SANDBOX ? <OptionSelector typingRef={typingRef} /> : ""}
           </Options>
           
         </Container>

@@ -5,6 +5,7 @@ import { setIsMultiplayer } from "../redux/multiplayerSlice";
 import { socket } from "../Socket";
 import MainTypingGame from "../components/generalTyping/MainTypingGame";
 import { setRoomID } from "../redux/privateSlice";
+import { GAME_MODES } from "../constants";
 
 const Multiplayer = () => {
   const dispatch = useDispatch()
@@ -12,7 +13,7 @@ const Multiplayer = () => {
 
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
-    dispatch(setTypingMode(1))
+    dispatch(setTypingMode(GAME_MODES.MULTIPLAYER))
   }, [])
 
   useEffect(() => {
@@ -40,7 +41,7 @@ const Multiplayer = () => {
     })
 
     socket.on("tell_user_to_start_game", (roomID) => {
-      socket.emit("start_game", [1, roomID])
+      socket.emit("start_game", [GAME_MODES.MULTIPLAYER, roomID])
     })
 
   }, [dispatch, socket])
