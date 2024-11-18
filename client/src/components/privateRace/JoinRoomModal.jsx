@@ -20,17 +20,21 @@ const JoinRoomModal = ({ }) => {
   }
 
   useEffect(() => {
-    socket.on("successfuly_joined_private_room", (roomID) => {
-      dispatch(setRoomID(roomID))
-    })
 
-    socket.on("room_doesnt_exist", () => {
+    const onSuccessfulyJoinedPrivateRoom = (roomID) => {
+      dispatch(setRoomID(roomID))
+    } 
+
+    const noRoomDoesntExist = () => {
       setErrMessage("invalid room code - room doesn't exist")
-    })
+    }
+    socket.on("successfuly_joined_private_room", onSuccessfulyJoinedPrivateRoom)
+
+    socket.on("room_doesnt_exist", noRoomDoesntExist)
 
     return () => {
-      socket.off("successfuly_joined_private_room");
-      socket.off("room_doesnt_exist");
+      socket.off("successfuly_joined_private_room", onSuccessfulyJoinedPrivateRoom);
+      socket.off("room_doesnt_exist", noRoomDoesntExist);
     }
   }, [socket, dispatch])
 

@@ -12,6 +12,13 @@ import { GAME_MODES } from '../constants'
 
 
 const PrivateRace = () => {
+  // Detect tab close or window unload
+  window.addEventListener('beforeunload', () => {
+    // Emit data to the backend before the tab closes
+    socket.emit('pre_disconnect', [typingMode, roomID]);
+  });
+
+
   const dispatch = useDispatch()
   const roomID = useSelector((state) => state.private.roomID)
   const startPrivateGame = useSelector((state) => state.private.startPrivateGame)
@@ -23,33 +30,39 @@ const PrivateRace = () => {
     dispatch(setTypingMode(GAME_MODES.PRIVATE))
   }, [])
 
+  // useEffect(() => {
+  //   const runCode = () => {
+  //     socket.emit('pre_disconnect', [typingMode, roomID]);
+  //   }
+
+  //   // Detect tab close or window unload
+  //   window.addEventListener('unload', runCode);
+
+  //   return () => {
+  //     window.removeEventListener('unload', runCode)
+  //   }
+  // }, [])
+
   useEffect(() => {
-    const runCode = () => {
-      socket.emit('pre_disconnect', [typingMode, roomID]);
-    }
 
-    // Detect tab close or window unload
-    window.addEventListener('unload', runCode);
-
-    return () => {
-      window.removeEventListener('unload', runCode)
-    }
-  }, [])
-
-  useEffect(() => {
-    socket.on("users_back_to_lobby", () => {
+    const onUsersBackToLobby = () => {
       dispatch(reset())
       dispatch(setStartPrivateGame(false))
       dispatch(setHasRaceStarted(false));
-    })
+    }
 
-    socket.on("start_new_private_game", () => {
+    const onStartNewPrivateGame = () => {
       dispatch(reset())
       dispatch(setHasRaceStarted(false));
-    })
+    }
+
+    socket.on("users_back_to_lobby", onUsersBackToLobby)
+
+    socket.on("start_new_private_game", onStartNewPrivateGame)
 
     return () => {
-      socket.off("users_back_to_lobby");
+      socket.off("users_back_to_lobby", onUsersBackToLobby);
+      socket.off("start_new_private_game", onStartNewPrivateGame);
     }
   }, [socket, dispatch])
 
@@ -58,7 +71,6 @@ const PrivateRace = () => {
     socket.connect();
 
     return () => {
-      socket.off("set_user_data")
       socket.disconnect();
     };
   }, []);

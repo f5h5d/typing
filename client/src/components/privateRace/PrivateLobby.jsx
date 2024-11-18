@@ -16,45 +16,52 @@ const PrivateLobby = () => {
   const typingMode = useSelector((state) => state.typing.typingMode)
 
   useEffect(() => {
-    socket.on("initialize_user_id", (data) => {
+
+    const onInitializeUserId = (data) => {
       dispatch(setSocketID(data))
-    })
+    }
 
-
-    socket.on("initialize_user_data_for_others", (data) => {
+    const onInitializeUserDataForOthers = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
       dispatch(setOtherPlayersData(users));
-    });
+    }
 
-    socket.on("initialize_other_users_data", (data) => {
+    const onInitializeOtherUsersData = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
       dispatch(setOtherPlayersData(users));
-    })
+    }
 
-
-    socket.on("started_game", () => {
+    const onStartedGame = () => {
       dispatch(setStartPrivateGame(true))
-      socket.emit("track_user", roomID)
-    })
+      socket.emit("track_user", [typingMode, roomID])
+    }
+    socket.on("initialize_user_id", onInitializeUserId)
+
+
+    socket.on("initialize_user_data_for_others", onInitializeUserDataForOthers);
+
+    socket.on("initialize_other_users_data", onInitializeOtherUsersData)
+
+    socket.on("started_game", onStartedGame)
   
     return () => {
-      socket.off("initialize_user_id");
-      socket.off("initialize_user_data_for_others");
-      socket.off("initialize_other_users_data");
-      socket.off("started_game");
+      socket.off("initialize_user_id", onInitializeUserId);
+      socket.off("initialize_user_data_for_others", onInitializeUserDataForOthers);
+      socket.off("initialize_other_users_data", onInitializeOtherUsersData);
+      socket.off("started_game", onStartedGame);
     };
   }, [socket, dispatch]);
 
 
   const onStartClick = () => {
       socket.emit("start_game", [typingMode, roomID])
-      socket.emit("track_user", roomID)
+      socket.emit("track_user", [typingMode, roomID])
       dispatch(setStartPrivateGame(true));
   }
 

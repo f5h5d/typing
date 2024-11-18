@@ -6,6 +6,7 @@ const privateRooms = new Map();
 const roomsTextCache = new Map();
 const privateRoomTextMap = new Map(); // will need to do constant searches for seeing if a roomID already exists so set is good as it is O(1) for searching
 
+let lastCreatedPublicRoom = {} // used for adding users to room, should fill this before moving on
 
 const PREGAME_TIMER = 3
 const MAX_USERS_PER_GAME = 3
@@ -26,13 +27,14 @@ module.exports = (io) => {
         room = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
       } while (privateRooms.has(room))
   
-      privateRooms.set(room, {usersCompleted: [], usersData: {}, preGameTimer: PREGAME_TIMER});
+      privateRooms.set(room, {usersCompleted: [], usersData: {}, preGameTimer: PREGAME_TIMER, id: room});
   
       socket.emit("created_room", room) 
   
     })
   
     socket.on("join_room", ([id, mode, userData]) => {
+      console.log("JOINED_room")
       let roomID = id; // for public set id to 0 by default
       let room;
   
@@ -46,24 +48,28 @@ module.exports = (io) => {
         }
   
       } else if (mode == 1) { 
-        const lastRoom = rooms.get(rooms.size - 1);
-        if ((rooms.size > 0 && (Object.keys(lastRoom.usersData).length > MAX_USERS_PER_GAME || lastRoom.preGameTimer < 1))) { // this means all rooms are at max capacity (4 is max)
-          roomID = rooms.size; // Create a new room
+        const test = lastCreatedPublicRoom
+        console.log(test)
+        if ((rooms.size > 0 && (Object.keys(lastCreatedPublicRoom.usersData).length > MAX_USERS_PER_GAME || lastCreatedPublicRoom.preGameTimer < 1))) { // this means all rooms are at max capacity (4 is max)
+          
+          do { // constantly loop to generate a code that doesnt already exist in the set
+            roomID = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+          } while (rooms.has(room))
+
         } else if (rooms.size > 0) {
-          roomID = rooms.size - 1; // Use the last room
+          roomID = lastCreatedPublicRoom.id; // Use the last room
         }
         
   
   
         socket.emit("get_room_id", roomID) // give roomID to user if in multiplayer mode
         if (!rooms.get(roomID)) { // room doesn't exist so must create room
-          rooms.set(roomID, {usersCompleted: [], usersData: {}, preGameTimer: PREGAME_TIMER}); // usersCompleted stores id/username of users that have finished in order
+          rooms.set(roomID, {usersCompleted: [], usersData: {}, preGameTimer: PREGAME_TIMER, id: roomID}); // usersCompleted stores id/username of users that have finished in order
           io.to(roomID).emit("pre_game_timer", rooms.get(roomID).preGameTimer); // tell all clients to set the pregame timer
-          
-          console.log(roomID)
           socket.emit("user_must_start_game", roomID) // ADD LATER
         }
         room = rooms.get(roomID); // set the room
+        lastCreatedPublicRoom = rooms.get(roomID)// update the last created public room
       }
   
   
@@ -91,7 +97,8 @@ module.exports = (io) => {
   
   
     socket.on("start_game", ([mode, roomID]) => {
-      let room = rooms.get(roomID) ? rooms.get(roomID) : privateRooms.get(roomID)
+      console.log(mode)
+      let room = mode = GAME_MODES.MULTIPLAYER ? rooms.get(roomID) : privateRooms.get(roomID)
       socket.to(roomID).emit("started_game")
   
       io.to(roomID).emit("pre_game_timer", room.preGameTimer); // tell all clients to set the pregame timer
@@ -104,11 +111,7 @@ module.exports = (io) => {
             if (mode == 2) { // if private lobby
               privateRoomTextMap.set(roomID, response.data)
             } else { // is a public lobby
-              // console.log("before")
-              // console.log(roomsTextCache)
               roomsTextCache.set(roomID, response.data)
-              // console.log("after")
-              // console.log(roomsTextCache)
             }
             io.to(roomID).emit("initialize_typing_quote", response.data) // send everyone in the room teh typing quote
           })
@@ -123,8 +126,8 @@ module.exports = (io) => {
   
     })
   
-    socket.on("track_user", (roomID) => {
-      let room = rooms.get(roomID) ? rooms.get(roomID) : privateRooms.get(roomID)
+    socket.on("track_user", ([mode, roomID]) => {
+      let room = mode == GAME_MODES.MULTIPLAYER ? rooms.get(roomID) : privateRooms.get(roomID)
   
   
        // update the data for all other clients
@@ -176,7 +179,6 @@ module.exports = (io) => {
 
 
     socket.on("pre_disconnect", ([mode, roomID]) => { 
-      console.log(roomID)
       if (mode === GAME_MODES.MULTIPLAYER) {
         const room = rooms.get(roomID);
         if (room === undefined) return;
@@ -195,12 +197,11 @@ module.exports = (io) => {
         const room = privateRooms.get(roomID)
 
         if (room === undefined) return;
-
         delete room.usersData[socket.id];
         socket.to(roomID).emit("initialize_user_data_for_others", room.usersData);
         if (Object.keys(room.usersData).length == 0) {
-          rooms.delete(roomID)
-          roomsTextCache.delete(roomID)
+          privateRooms.delete(roomID)
+          privateRoomTextMap.delete(roomID)
         }
       }
     })

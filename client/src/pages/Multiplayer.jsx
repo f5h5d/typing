@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector} from "react-redux";
 import { setTypingMode } from "../redux/typingSlice";
 import { setIsMultiplayer } from "../redux/multiplayerSlice";
@@ -22,28 +22,34 @@ const Multiplayer = () => {
   const typingMode = useSelector((state) => state.typing.typingMode)
   const roomID = useSelector((state) => state.private.roomID)
 
+  const lookingForRoom = useSelector((state) => state.multiplayer.lookingForRoom)
+
+  const lookingForRoomRef = useRef(lookingForRoom)
+
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
     dispatch(setTypingMode(GAME_MODES.MULTIPLAYER))
   }, [])
 
-  useEffect(() => {
-    const runCode = () => {
-      socket.emit('pre_disconnect', [typingMode, roomID]);
-    }
+  // useEffect(() => {
+  //   const runCode = () => {
+  //     socket.emit('pre_disconnect', [typingMode, roomID]);
+  //   }
 
-    // Detect tab close or window unload
-    window.addEventListener('unload', runCode);
+  //   // Detect tab close or window unload
+  //   window.addEventListener('unload', runCode);
 
-    return () => {
-      window.removeEventListener('unload', runCode)
-    }
-  }, [])
+  //   return () => {
+  //     window.removeEventListener('unload', runCode)
+  //   }
+  // }, [])
 
   useEffect(() => {
 
 
     socket.connect();
+
+    if (!lookingForRoomRef.current) return;
 
     const userData = {
       username: "",
@@ -54,36 +60,36 @@ const Multiplayer = () => {
     }
 
     socket.emit("join_room", [0, 1, userData])
+    lookingForRoomRef.current = false;
     return () => {
-
-      console.log(roomID)
-      socket.disconnect([typingMode, roomID]);
+      socket.disconnect();
     };
   }, []);
 
 
   useEffect(() => {
-    socket.on("get_room_id", (id) => {
-
-      console.log("ROOM ID GETTING: "  + id)
+    const onGetRoomId = (id) => {
       dispatch(setRoomID(id))
+      socket.emit("track_user", [GAME_MODES.MULTIPLAYER, id])
+    }
 
-      console.log('i thought that you were dreaming of')
-      socket.emit("track_user", id)
-    })
-
-    socket.on("tell_user_to_start_game", (roomID) => {
+    const tellUserToStartGame = (roomID) => {
       socket.emit("start_game", [GAME_MODES.MULTIPLAYER, roomID])
-    })
+    }
+
+    socket.on("get_room_id", onGetRoomId)
+
+    socket.on("tell_user_to_start_game", tellUserToStartGame)
 
     return () => {
-      socket.off("get_room_id");
-      socket.off("ell_user_to_start_game");
+      socket.off("get_room_id", onGetRoomId);
+      socket.off("tell_user_to_start_game", tellUserToStartGame);
     }
 
   }, [dispatch, socket])
+
   return (
-    <MainTypingGame />
+    <MainTypingGame lookingForRoomRef={lookingForRoomRef}/>
   );
 };
 

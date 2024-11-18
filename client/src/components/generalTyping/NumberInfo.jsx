@@ -148,7 +148,7 @@ const NumberInfo = () => {
 
 
 const Buttons = styled.div`
-  position: relative;
+  /* position: relative; */
 
   top: 30px;
   width: 90vw;

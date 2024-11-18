@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   isMultiplayer: false,
-  lookingForRoom: false,
+  lookingForRoom: true,
   room: 0,
   mode: -1, // 0 is quotes 1 is words
   otherPlayersData: {},
