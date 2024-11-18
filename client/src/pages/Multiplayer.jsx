@@ -8,8 +8,19 @@ import { setRoomID } from "../redux/privateSlice";
 import { GAME_MODES } from "../constants";
 
 const Multiplayer = () => {
+
+  // Detect tab close or window unload
+  window.addEventListener('beforeunload', () => {
+    // Emit data to the backend before the tab closes
+    socket.emit('pre_disconnect', [typingMode, roomID]);
+  });
+
+
   const dispatch = useDispatch()
   const typingText = useSelector((state) => state.typing.typingText)
+
+  const typingMode = useSelector((state) => state.typing.typingMode)
+  const roomID = useSelector((state) => state.private.roomID)
 
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
@@ -17,6 +28,21 @@ const Multiplayer = () => {
   }, [])
 
   useEffect(() => {
+    const runCode = () => {
+      socket.emit('pre_disconnect', [typingMode, roomID]);
+    }
+
+    // Detect tab close or window unload
+    window.addEventListener('unload', runCode);
+
+    return () => {
+      window.removeEventListener('unload', runCode)
+    }
+  }, [])
+
+  useEffect(() => {
+
+
     socket.connect();
 
     const userData = {
@@ -29,14 +55,18 @@ const Multiplayer = () => {
 
     socket.emit("join_room", [0, 1, userData])
     return () => {
-      socket.disconnect();
+
+      console.log(roomID)
+      socket.disconnect([typingMode, roomID]);
     };
   }, []);
 
 
   useEffect(() => {
     socket.on("get_room_id", (id) => {
-      setRoomID(id)
+
+      console.log("ROOM ID GETTING: "  + id)
+      dispatch(setRoomID(id))
 
       console.log('i thought that you were dreaming of')
       socket.emit("track_user", id)
@@ -45,6 +75,11 @@ const Multiplayer = () => {
     socket.on("tell_user_to_start_game", (roomID) => {
       socket.emit("start_game", [GAME_MODES.MULTIPLAYER, roomID])
     })
+
+    return () => {
+      socket.off("get_room_id");
+      socket.off("ell_user_to_start_game");
+    }
 
   }, [dispatch, socket])
   return (

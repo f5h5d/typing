@@ -27,6 +27,11 @@ const JoinRoomModal = ({ }) => {
     socket.on("room_doesnt_exist", () => {
       setErrMessage("invalid room code - room doesn't exist")
     })
+
+    return () => {
+      socket.off("successfuly_joined_private_room");
+      socket.off("room_doesnt_exist");
+    }
   }, [socket, dispatch])
 
 

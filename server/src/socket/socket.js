@@ -10,6 +10,12 @@ const privateRoomTextMap = new Map(); // will need to do constant searches for s
 const PREGAME_TIMER = 3
 const MAX_USERS_PER_GAME = 3
 
+const GAME_MODES = {
+  SANDBOX: 0,
+  MULTIPLAYER: 1,
+  PRIVATE: 2
+}
+
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -53,6 +59,8 @@ module.exports = (io) => {
         if (!rooms.get(roomID)) { // room doesn't exist so must create room
           rooms.set(roomID, {usersCompleted: [], usersData: {}, preGameTimer: PREGAME_TIMER}); // usersCompleted stores id/username of users that have finished in order
           io.to(roomID).emit("pre_game_timer", rooms.get(roomID).preGameTimer); // tell all clients to set the pregame timer
+          
+          console.log(roomID)
           socket.emit("user_must_start_game", roomID) // ADD LATER
         }
         room = rooms.get(roomID); // set the room
@@ -161,7 +169,45 @@ module.exports = (io) => {
           room.usersData[user].wpm = 0;
           room.usersData[user].percentage = 0;
         })
+
+        socket.to(roomID).emit("start_new_private_game")
       })
+    })
+
+
+    socket.on("pre_disconnect", ([mode, roomID]) => { 
+      console.log(roomID)
+      if (mode === GAME_MODES.MULTIPLAYER) {
+        const room = rooms.get(roomID);
+        if (room === undefined) return;
+
+
+        delete room.usersData[socket.id]
+        socket.to(roomID).emit("initialize_user_data_for_others", room.usersData);
+        if (Object.keys(room.usersData).length == 0) {
+          rooms.delete(roomID)
+          roomsTextCache.delete(roomID)
+        }
+      }
+
+      else if (mode === GAME_MODES.PRIVATE) {
+        console.log("HERE")
+        const room = privateRooms.get(roomID)
+
+        if (room === undefined) return;
+
+        delete room.usersData[socket.id];
+        socket.to(roomID).emit("initialize_user_data_for_others", room.usersData);
+        if (Object.keys(room.usersData).length == 0) {
+          rooms.delete(roomID)
+          roomsTextCache.delete(roomID)
+        }
+      }
+    })
+
+
+    socket.on("disconnect", (reason) => {
+      console.log("disconnected")
     })
   
     io.on("disconnect", function () {

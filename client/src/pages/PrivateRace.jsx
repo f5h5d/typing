@@ -15,10 +15,25 @@ const PrivateRace = () => {
   const dispatch = useDispatch()
   const roomID = useSelector((state) => state.private.roomID)
   const startPrivateGame = useSelector((state) => state.private.startPrivateGame)
+
+  const typingMode = useSelector((state) => state.typing.typingMode)
   
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
     dispatch(setTypingMode(GAME_MODES.PRIVATE))
+  }, [])
+
+  useEffect(() => {
+    const runCode = () => {
+      socket.emit('pre_disconnect', [typingMode, roomID]);
+    }
+
+    // Detect tab close or window unload
+    window.addEventListener('unload', runCode);
+
+    return () => {
+      window.removeEventListener('unload', runCode)
+    }
   }, [])
 
   useEffect(() => {
@@ -27,6 +42,15 @@ const PrivateRace = () => {
       dispatch(setStartPrivateGame(false))
       dispatch(setHasRaceStarted(false));
     })
+
+    socket.on("start_new_private_game", () => {
+      dispatch(reset())
+      dispatch(setHasRaceStarted(false));
+    })
+
+    return () => {
+      socket.off("users_back_to_lobby");
+    }
   }, [socket, dispatch])
 
 

@@ -34,7 +34,12 @@ const NumberInfo = () => {
   const prompts = ["WPM", "Accuracy", "Time", "Mistakes"]
 
   const onHomeClick = () => {
-    reset()
+    if (typingMode !== GAME_MODES.SANDBOX) { 
+      socket.emit("pre_disconnect", [typingMode, roomID])
+      socket.disconnect();
+    }
+    dispatch(reset())
+    navigate("/")
   }
   const values = [wpmRecord[wpmRecord.length-1].wpm, Math.round(((typingText.length / (typingText.length + mistakes)) * 100)*100) / 100, wpmRecord[wpmRecord.length-1].time, mistakes]
   let lowerDomain = wpmRecord.find(({wpm}) => wpm < 25) == undefined ? "dataMin - 25" : 0 // if user has wpm lower than 25 then y axis would go into negatives
@@ -55,15 +60,15 @@ const NumberInfo = () => {
 
   const onNextRace = () => {
     dispatch(reset())
-
+    
     if (typingMode == GAME_MODES.MULTIPLAYER) { // multiplayer
       socket.emit("join_room", [roomID, GAME_MODES.MULTIPLAYER, userData])
     }
 
     else if (typingMode == GAME_MODES.PRIVATE) { 
+      dispatch(setHasRaceStarted(false));
       socket.emit("reset_game_values", roomID)
       socket.emit("start_game", [typingMode, roomID])
-      socket.emit("track_user", roomID)
     }
 
 
@@ -133,7 +138,7 @@ const NumberInfo = () => {
         </RightSideContainer >
       </MainContent>
       <Buttons>
-        <Link onClick={onHomeClick} to="/" className="button home">Home</Link>
+        <div onClick={onHomeClick}  className="button home">Home</div>
         { typingMode == GAME_MODES.PRIVATE && roomOwner ? <div className="button" onClick={onBackToLobby}>Back To Lobby</div> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
         <Link className="button next-race" onClick={onNextRace}>Next Race</Link>
       </Buttons>

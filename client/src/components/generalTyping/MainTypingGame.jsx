@@ -6,7 +6,6 @@ import TypingSection from "./TypingSection";
 import PercentageComplete from "./PercentageComplete";
 import { useDispatch, useSelector} from "react-redux";
 import NumberInfo from "./NumberInfo";
-import axios from "axios";
 import { reset, setStartTime, setTypingBackgroundInfo, setTypingText } from "../../redux/typingSlice";
 import OtherPlayersPercentageComplete from "../multiplayer/OtherPlayersPercentageComplete";
 import { setHasRaceStarted, setIsMultiplayer, setOtherPlayersData, setPreRaceTimer, setRacePlacement, setSocketID } from "../../redux/multiplayerSlice";
@@ -81,7 +80,12 @@ const PrivateRaceGame = () => {
     })
   
     return () => {
-      socket.off("initalize_users_data");
+      socket.off("initialize_typing_quote");
+      socket.off("initialize_user_data_for_others");
+      socket.off("initialize_other_users_data");
+      socket.off("pre_game_timer");
+      socket.off("update_users_data");
+      socket.off("user_finished_position");
     };
   }, [socket, dispatch]);
 

@@ -42,7 +42,9 @@ const PrivateLobbyChooser = () => {
       socket.emit("join_room", [id, TYPING_MODE, userData])
     })
 
-
+    return () => {
+      socket.off("created_room");
+    }
   }, [socket, dispatch])
   return (
     <>
