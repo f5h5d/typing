@@ -5,8 +5,8 @@ import MainTypingGame from '../components/generalTyping/MainTypingGame'
 import { useDispatch, useSelector } from 'react-redux'
 import { socket } from '../Socket'
 import PrivateLobby from '../components/privateRace/PrivateLobby'
-import { setIsMultiplayer } from '../redux/multiplayerSlice'
-import { setTypingMode } from '../redux/typingSlice'
+import { setHasRaceStarted, setIsMultiplayer } from '../redux/multiplayerSlice'
+import { reset, setTypingMode } from '../redux/typingSlice'
 import { setStartPrivateGame } from '../redux/privateSlice'
 import { GAME_MODES } from '../constants'
 
@@ -15,7 +15,6 @@ const PrivateRace = () => {
   const dispatch = useDispatch()
   const roomID = useSelector((state) => state.private.roomID)
   const startPrivateGame = useSelector((state) => state.private.startPrivateGame)
-  const reset = useSelector((state) => state.typing.reset);
   
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
@@ -24,8 +23,9 @@ const PrivateRace = () => {
 
   useEffect(() => {
     socket.on("users_back_to_lobby", () => {
+      dispatch(reset())
       dispatch(setStartPrivateGame(false))
-      reset()
+      dispatch(setHasRaceStarted(false));
     })
   }, [socket, dispatch])
 

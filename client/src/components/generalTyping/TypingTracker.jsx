@@ -106,6 +106,7 @@ const TypingTracker = () => {
         deltaTime = Date.now()
       } else {
         if (((Date.now() - startTimeRef.current) % 1000 > 9 && deltaTime !== 0) || Math.trunc((Date.now() - startTimeRef.current)/1000) == 0) return; // if less than 1 second has passed dont run the function or if atleast one second hasnt passed
+        
         if ((Date.now() - lastTypedRef.current)/1000 > 20) { // has been longer than 20 seconds since user last typed, so void test
           dispatch(setRestart(true))
         }

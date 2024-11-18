@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from "styled-components"
 import { socket } from '../../Socket'
 import { useDispatch, useSelector } from 'react-redux'
-import { setJoiningRoom, setRoomID } from '../../redux/privateSlice'
+import { setJoiningRoom, setRoomID, setStartPrivateGame } from '../../redux/privateSlice'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faX } from '@fortawesome/free-solid-svg-icons'
 const JoinRoomModal = ({ }) => {
@@ -42,7 +42,6 @@ const JoinRoomModal = ({ }) => {
       roomOwner: false,
     }
     socket.emit("join_room", [id, typingMode, userData])
-    dispatch(setStartPrivateGame(true));
   }
 
   const onCancel = () => {

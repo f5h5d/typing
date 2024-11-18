@@ -3,7 +3,7 @@ const axios = require('axios');
 const rooms = new Map()
 const privateRooms = new Map();
 
-const roomsTextCache = new NodeCache({ stdTTL: 300});
+const roomsTextCache = new Map();
 const privateRoomTextMap = new Map(); // will need to do constant searches for seeing if a roomID already exists so set is good as it is O(1) for searching
 
 
@@ -41,12 +41,12 @@ module.exports = (io) => {
   
       } else if (mode == 1) { 
         const lastRoom = rooms.get(rooms.size - 1);
-        if (rooms.size > 0 && (Object.keys(lastRoom.usersData).length > MAX_USERS_PER_GAME || lastRoom.preGameTimer < 1)) { // this means all rooms are at max capacity (4 is max)
+        if ((rooms.size > 0 && (Object.keys(lastRoom.usersData).length > MAX_USERS_PER_GAME || lastRoom.preGameTimer < 1))) { // this means all rooms are at max capacity (4 is max)
           roomID = rooms.size; // Create a new room
         } else if (rooms.size > 0) {
           roomID = rooms.size - 1; // Use the last room
         }
-  
+        
   
   
         socket.emit("get_room_id", roomID) // give roomID to user if in multiplayer mode
@@ -59,6 +59,7 @@ module.exports = (io) => {
       }
   
   
+    
       socket.join(roomID)
       // Add new player to the room
       room.usersData["" + socket.id] = {...userData, username: socket.id, id: socket.id }; // update the data in the backend
@@ -73,9 +74,9 @@ module.exports = (io) => {
       }
   
   
-      if (room.preGameTimer < PREGAME_TIMER) {
-        socket.emit("initialize_typing_quote", roomsTextCache.get(roomID))
-      }
+      // if (room.preGameTimer < PREGAME_TIMER) {
+      //   socket.emit("initialize_typing_quote", roomsTextCache.get(roomID))
+      // }
 
       socket.emit("pre_game_timer", room.preGameTimer); // give the user the current pre-game-timer
     });
@@ -86,7 +87,6 @@ module.exports = (io) => {
       socket.to(roomID).emit("started_game")
   
       io.to(roomID).emit("pre_game_timer", room.preGameTimer); // tell all clients to set the pregame timer
-      io.emit("pre_game_timer", room.preGameTimer) // tell owner same thing
   
   
       const preGameInterval = setInterval(() => { // decrement the pregame timer for 10 seconds when lobby created
@@ -96,10 +96,13 @@ module.exports = (io) => {
             if (mode == 2) { // if private lobby
               privateRoomTextMap.set(roomID, response.data)
             } else { // is a public lobby
+              // console.log("before")
+              // console.log(roomsTextCache)
               roomsTextCache.set(roomID, response.data)
+              // console.log("after")
+              // console.log(roomsTextCache)
             }
-            io.to(roomID).emit("initialize_typing_quote", response.data)
-            io.emit("initialize_typing_quote", response.data)
+            io.to(roomID).emit("initialize_typing_quote", response.data) // send everyone in the room teh typing quote
           })
         };
   

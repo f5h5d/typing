@@ -37,6 +37,8 @@ const Multiplayer = () => {
   useEffect(() => {
     socket.on("get_room_id", (id) => {
       setRoomID(id)
+
+      console.log('i thought that you were dreaming of')
       socket.emit("track_user", id)
     })
 

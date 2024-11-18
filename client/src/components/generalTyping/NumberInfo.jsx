@@ -54,19 +54,7 @@ const NumberInfo = () => {
   }
 
   const onNextRace = () => {
-    // dispatch(nextRaceMultiplayerReset())
-    // if (typingMode == 2) dispatch(nextRacePrivateReset())
-    // dispatch(reset())
-    // const userData = {
-    //   username: "",
-    //   wpm: 0,
-    //   currentWord: typingText.split(" ")[0],
-    //   percentage: 0,
-    //   id: ""
-    // }
-
     dispatch(reset())
-    // dispatch(nextRaceMultiplayerReset())
 
     if (typingMode == GAME_MODES.MULTIPLAYER) { // multiplayer
       socket.emit("join_room", [roomID, GAME_MODES.MULTIPLAYER, userData])

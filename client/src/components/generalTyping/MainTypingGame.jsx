@@ -31,6 +31,8 @@ const PrivateRaceGame = () => {
 
   useEffect(() => {
     socket.on("initialize_typing_quote", (data) => {
+
+      console.log("why am i getting initalized")
       dispatch(reset())
       dispatch(setTypingText(data.words))
       dispatch(setTypingBackgroundInfo(data))
@@ -129,7 +131,7 @@ const PrivateRaceGame = () => {
           </TypingContainer>
           <Options>
 
-            {typingMode == GAME_MODES.SANDBOX ? <OptionSelector typingRef={typingRef} /> : ""}
+            {/* {typingMode == GAME_MODES.SANDBOX ? <OptionSelector typingRef={typingRef} /> : ""} */}
           </Options>
           
         </Container>

@@ -28,6 +28,8 @@ export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incor
       const currentTime = Date.now()
       dispatch(setWpmRecord([...wpmRecord, {time: Math.round((currentTime - startTime)/1000 * 100) / 100, wpm: wpm, mistakes: mistakes}])) // add last record for the ending graph
       dispatch(setEndTime(currentTime))
+
+      console.log("falls back sometimes")
       dispatch(setFinishedTest(true));
     }, 100)
 
