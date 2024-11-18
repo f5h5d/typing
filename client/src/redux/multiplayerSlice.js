@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   isMultiplayer: false,
+  lookingForRoom: true,
   room: 0,
   mode: -1, // 0 is quotes 1 is words
   otherPlayersData: {},
@@ -17,6 +18,9 @@ const multiplayerSlice = createSlice({
   reducers: {
     setIsMultiplayer: (state, action) => {
       state.isMultiplayer = action.payload;
+    },
+    setLookingForRoom: (state, action) => {
+      state.lookingForRoom = action.payload;
     },
     setMode: (state, action) => {
       state.mode = action.payload;
@@ -38,29 +42,32 @@ const multiplayerSlice = createSlice({
     },
 
 
-    // setOtherPlayersData: (state, action) => {
-    //   state.otherPlayersData = {
-    //     ...state.otherPlayersData,
-    //     ...action.payload,
-    //   };
-    // },
-
     setOtherPlayersData: (state, action) => {
       state.otherPlayersData = action.payload;
     },
+
+    nextRaceMultiplayerReset: (state) => {
+      state.room = initialState.room
+      state.otherPlayersData = initialState.otherPlayersData
+      state.racePlacement = initialState.racePlacement
+      state.preRaceTimer = initialState.preRaceTimer
+      state.hasRaceStarted = initialState.hasRaceStarted
+    }
   },
 });
 
 
 export const {
   setMode,
+  setLookingForRoom,
   setOtherPlayersData,
   setInitalOtherPlayersData,
   setSocketID,
   setRacePlacement,
   setPreRaceTimer,
   setHasRaceStarted,
-  setIsMultiplayer
+  setIsMultiplayer,
+  nextRaceMultiplayerReset
   // reset,
 } = multiplayerSlice.actions;
 

@@ -7,11 +7,11 @@ import Theme from './theme.jsx';
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
-  //  <StrictMode>
+   <StrictMode>
     <Provider store={store}>
       <Theme>
         <App />
       </Theme>
     </Provider>,
-   {/* </StrictMode> */}
+  </StrictMode>
 )

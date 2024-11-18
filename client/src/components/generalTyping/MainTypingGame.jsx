@@ -6,14 +6,14 @@ import TypingSection from "./TypingSection";
 import PercentageComplete from "./PercentageComplete";
 import { useDispatch, useSelector} from "react-redux";
 import NumberInfo from "./NumberInfo";
-import axios from "axios";
-import { reset, setStartTime, setTypingBackgroundInfo, setTypingMode, setTypingText } from "../../redux/typingSlice";
+import { reset, setStartTime, setTypingBackgroundInfo, setTypingText } from "../../redux/typingSlice";
 import OtherPlayersPercentageComplete from "../multiplayer/OtherPlayersPercentageComplete";
 import { setHasRaceStarted, setIsMultiplayer, setOtherPlayersData, setPreRaceTimer, setRacePlacement, setSocketID } from "../../redux/multiplayerSlice";
 import { socket } from "../../Socket";
 import OptionSelector from "../sandbox/OptionSelector";
+import { GAME_MODES } from "../../constants";
 
-const PrivateRaceGame = () => {
+const PrivateRaceGame = ({ lookingForRoomRef }) => {
   const dispatch = useDispatch()
   const finishedTest = useSelector((state) => state.typing.finishedTest);
   const wpm = useSelector((state) => state.typing.wpm);
@@ -28,34 +28,32 @@ const PrivateRaceGame = () => {
 
   const percentage = (wordsTyped / typingText.split(" ").length) * 100;
 
-  // const startTimeRef = startTime
-
   useEffect(() => {
-    socket.on("initialize_typing_quote", (data) => {
+    const onInitializeTypingQuote = (data) => {
       dispatch(reset())
       dispatch(setTypingText(data.words))
       dispatch(setTypingBackgroundInfo(data))
       typingRef.current.value = ""
+    }
 
-    })
-
-    socket.on("initialize_user_data_for_others", (data) => {
+    const onInitializeUserDataForOthers = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
       dispatch(setOtherPlayersData(users));
-    });
+    }
 
-    socket.on("initialize_other_users_data", (data) => {
+    const onInitializeOtherUsersData = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
       dispatch(setOtherPlayersData(users));
-    })
-
-    socket.on("pre_game_timer", (data) => {
+    }
+    
+    const onPreGameTimer = (data) => {
+      console.log(data)
       dispatch(setPreRaceTimer(data))
       if (data == -1) {
 
@@ -64,23 +62,41 @@ const PrivateRaceGame = () => {
           dispatch(setStartTime(Date.now()))
         }, 300)
       };
-    })
+    }
 
-    socket.on("update_users_data", (data) => {
+    const updateUsersData = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
 
       dispatch(setOtherPlayersData(users));
-    })
+    }
 
-    socket.on("user_finished_position", (data) => {
+    const onUserFinishedPosition = (data) => {
       dispatch(setRacePlacement(data));
-    })
+    }
+
+
+    socket.on("initialize_typing_quote", onInitializeTypingQuote)
+
+    socket.on("initialize_user_data_for_others", onInitializeUserDataForOthers);
+
+    socket.on("initialize_other_users_data", onInitializeOtherUsersData)
+
+    socket.on("pre_game_timer", onPreGameTimer)
+
+    socket.on("update_users_data", updateUsersData)
+
+    socket.on("user_finished_position", onUserFinishedPosition)
   
     return () => {
-      socket.off("initalize_users_data");
+      socket.off("initialize_typing_quote", onInitializeTypingQuote);
+      socket.off("initialize_user_data_for_others", onInitializeUserDataForOthers);
+      socket.off("initialize_other_users_data", onInitializeOtherUsersData);
+      socket.off("pre_game_timer", onPreGameTimer);
+      socket.off("update_users_data", updateUsersData);
+      socket.off("user_finished_position", onUserFinishedPosition);
     };
   }, [socket, dispatch]);
 
@@ -117,7 +133,7 @@ const PrivateRaceGame = () => {
         </PostTypingContainer> 
         :
         <Container>
-          {!hasRaceStarted && typingMode !== 0 ? (
+          {!hasRaceStarted && typingMode !== GAME_MODES.SANDBOX ? (
             <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
           ) : ""}
             <PercentageCompleteSection>
@@ -130,7 +146,7 @@ const PrivateRaceGame = () => {
           </TypingContainer>
           <Options>
 
-            {typingMode == 0 ? <OptionSelector typingRef={typingRef}/> : ""}
+            {typingMode == GAME_MODES.SANDBOX ? <OptionSelector typingRef={typingRef} /> : ""}
           </Options>
           
         </Container>

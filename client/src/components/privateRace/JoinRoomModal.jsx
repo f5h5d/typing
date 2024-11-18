@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from "styled-components"
 import { socket } from '../../Socket'
 import { useDispatch, useSelector } from 'react-redux'
-import { setJoiningRoom, setRoomID } from '../../redux/privateSlice'
+import { setJoiningRoom, setRoomID, setStartPrivateGame } from '../../redux/privateSlice'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faX } from '@fortawesome/free-solid-svg-icons'
 const JoinRoomModal = ({ }) => {
@@ -20,13 +20,22 @@ const JoinRoomModal = ({ }) => {
   }
 
   useEffect(() => {
-    socket.on("successfuly_joined_private_room", (roomID) => {
-      dispatch(setRoomID(roomID))
-    })
 
-    socket.on("room_doesnt_exist", () => {
+    const onSuccessfulyJoinedPrivateRoom = (roomID) => {
+      dispatch(setRoomID(roomID))
+    } 
+
+    const noRoomDoesntExist = () => {
       setErrMessage("invalid room code - room doesn't exist")
-    })
+    }
+    socket.on("successfuly_joined_private_room", onSuccessfulyJoinedPrivateRoom)
+
+    socket.on("room_doesnt_exist", noRoomDoesntExist)
+
+    return () => {
+      socket.off("successfuly_joined_private_room", onSuccessfulyJoinedPrivateRoom);
+      socket.off("room_doesnt_exist", noRoomDoesntExist);
+    }
   }, [socket, dispatch])
 
 

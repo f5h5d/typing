@@ -10,6 +10,10 @@
   font-size: 100%;
   vertical-align: baseline;
   background: transparent;
+  box-sizing: border-box;
+
+  overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 body {

@@ -22,6 +22,10 @@ const privateSlice = createSlice({
     },
     setRoomOwner: (state, action) => {
       state.roomOwner = action.payload;
+    },
+    nextRacePrivateReset: (state) => {
+      state.startPrivateGame = initialState.startPrivateGame
+
     }
   },
 });
@@ -31,7 +35,8 @@ export const {
   setRoomID,
   setJoiningRoom,
   setStartPrivateGame,
-  setRoomOwner
+  setRoomOwner,
+  nextRacePrivateReset
   // reset,
 } = privateSlice.actions;
 

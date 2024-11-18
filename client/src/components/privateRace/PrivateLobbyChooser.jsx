@@ -26,7 +26,7 @@ const PrivateLobbyChooser = () => {
 
   useEffect(() => {
 
-    socket.on("created_room", (id) => {
+    const onCreatedRoom = (id) => {
       dispatch(setRoomOwner(true))
       dispatch(setRoomID(id))
 
@@ -40,9 +40,13 @@ const PrivateLobbyChooser = () => {
       }
 
       socket.emit("join_room", [id, TYPING_MODE, userData])
-    })
+    }
 
+    socket.on("created_room", onCreatedRoom)
 
+    return () => {
+      socket.off("created_room", onCreatedRoom);
+    }
   }, [socket, dispatch])
   return (
     <>

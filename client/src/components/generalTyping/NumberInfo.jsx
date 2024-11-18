@@ -3,21 +3,23 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import CountUp from 'react-countup';
 import { Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, ComposedChart, Label} from 'recharts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy } from '@fortawesome/free-solid-svg-icons';
-import { setStartPrivateGame } from '../../redux/privateSlice';
+import { nextRacePrivateReset, setStartPrivateGame } from '../../redux/privateSlice';
 import { reset } from '../../redux/typingSlice';
 import { socket } from '../../Socket';
-import { setHasRaceStarted } from '../../redux/multiplayerSlice';
+import { nextRaceMultiplayerReset, setHasRaceStarted } from '../../redux/multiplayerSlice';
+import { GAME_MODES } from '../../constants';
   
 const NumberInfo = () => {
+  
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const mistakes = useSelector((state) => state.typing.mistakes);
   const typingText = useSelector((state) => state.typing.typingText);
   const wpmRecord = useSelector((state) => state.typing.wpmRecord);
   const typingBackgroundInfo = useSelector((state) => state.typing.typingBackgroundInfo);
-  const backToLobbyReset = useSelector((state) => state.typing.backToLobbyReset);
   const selectedType = useSelector((state) => state.typing.selectedType)
   const selectedLength = useSelector((state) => state.typing.selectedLength)
   const wordsTyped = useSelector((state) => state.typing.wordsTyped)
@@ -32,8 +34,12 @@ const NumberInfo = () => {
   const prompts = ["WPM", "Accuracy", "Time", "Mistakes"]
 
   const onHomeClick = () => {
-    console.log("ON HOME CLICK")
-    reset()
+    if (typingMode !== GAME_MODES.SANDBOX) { 
+      socket.emit("pre_disconnect", [typingMode, roomID])
+      socket.disconnect();
+    }
+    dispatch(reset())
+    navigate("/")
   }
   const values = [wpmRecord[wpmRecord.length-1].wpm, Math.round(((typingText.length / (typingText.length + mistakes)) * 100)*100) / 100, wpmRecord[wpmRecord.length-1].time, mistakes]
   let lowerDomain = wpmRecord.find(({wpm}) => wpm < 25) == undefined ? "dataMin - 25" : 0 // if user has wpm lower than 25 then y axis would go into negatives
@@ -47,10 +53,25 @@ const NumberInfo = () => {
   const onBackToLobby = () => {
     socket.emit("back_to_lobby", roomID)
     // reset things
-    console.log("ON BACK TO LOBBY")
     dispatch(setStartPrivateGame(false))
     dispatch(setHasRaceStarted(false));
     dispatch(reset())
+  }
+
+  const onNextRace = () => {
+    dispatch(reset())
+    
+    if (typingMode == GAME_MODES.MULTIPLAYER) { // multiplayer
+      socket.emit("join_room", [roomID, GAME_MODES.MULTIPLAYER, userData])
+    }
+
+    else if (typingMode == GAME_MODES.PRIVATE) { 
+      dispatch(setHasRaceStarted(false));
+      socket.emit("reset_game_values", roomID)
+      socket.emit("start_game", [typingMode, roomID])
+    }
+
+
   }
 
   return (
@@ -117,9 +138,9 @@ const NumberInfo = () => {
         </RightSideContainer >
       </MainContent>
       <Buttons>
-        <Link onClick={onHomeClick} to="/" className="button home">Home</Link>
-        { typingMode == 2 && roomOwner ? <div className="button" onClick={onBackToLobby}>Back To Lobby</div> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
-        <Link className="button next-race">Next Race</Link>
+        <div onClick={onHomeClick}  className="button home">Home</div>
+        { typingMode == GAME_MODES.PRIVATE && roomOwner ? <div className="button" onClick={onBackToLobby}>Back To Lobby</div> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
+        <Link className="button next-race" onClick={onNextRace}>Next Race</Link>
       </Buttons>
     </Container>
   )
@@ -127,7 +148,7 @@ const NumberInfo = () => {
 
 
 const Buttons = styled.div`
-  position: relative;
+  /* position: relative; */
 
   top: 30px;
   width: 90vw;

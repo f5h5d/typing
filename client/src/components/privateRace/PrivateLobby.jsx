@@ -3,9 +3,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from "styled-components"
 import { setOtherPlayersData, setSocketID } from '../../redux/multiplayerSlice'
 import { socket } from '../../Socket'
-import { setStartPrivateGame } from '../../redux/privateSlice'
+import { setRoomID, setStartPrivateGame } from '../../redux/privateSlice'
+import { useNavigate } from 'react-router-dom'
+import { reset } from '../../redux/typingSlice'
 const PrivateLobby = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const otherPlayersData = useSelector((state) => state.multiplayer.otherPlayersData)
   const roomID = useSelector((state) => state.private.roomID)
   const roomOwner = useSelector((state) => state.private.roomOwner)
@@ -13,43 +16,58 @@ const PrivateLobby = () => {
   const typingMode = useSelector((state) => state.typing.typingMode)
 
   useEffect(() => {
-    socket.on("initialize_user_id", (data) => {
+
+    const onInitializeUserId = (data) => {
       dispatch(setSocketID(data))
-    })
+    }
 
-
-    socket.on("initialize_user_data_for_others", (data) => {
+    const onInitializeUserDataForOthers = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
       dispatch(setOtherPlayersData(users));
-    });
+    }
 
-    socket.on("initialize_other_users_data", (data) => {
+    const onInitializeOtherUsersData = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
       dispatch(setOtherPlayersData(users));
-    })
+    }
 
-
-    socket.on("started_game", () => {
+    const onStartedGame = () => {
       dispatch(setStartPrivateGame(true))
-      socket.emit("track_user", roomID)
-    })
+      socket.emit("track_user", [typingMode, roomID])
+    }
+    socket.on("initialize_user_id", onInitializeUserId)
+
+
+    socket.on("initialize_user_data_for_others", onInitializeUserDataForOthers);
+
+    socket.on("initialize_other_users_data", onInitializeOtherUsersData)
+
+    socket.on("started_game", onStartedGame)
   
     return () => {
-      socket.off("initalize_users_data");
+      socket.off("initialize_user_id", onInitializeUserId);
+      socket.off("initialize_user_data_for_others", onInitializeUserDataForOthers);
+      socket.off("initialize_other_users_data", onInitializeOtherUsersData);
+      socket.off("started_game", onStartedGame);
     };
   }, [socket, dispatch]);
 
 
   const onStartClick = () => {
       socket.emit("start_game", [typingMode, roomID])
-      socket.emit("track_user", roomID)
+      socket.emit("track_user", [typingMode, roomID])
       dispatch(setStartPrivateGame(true));
+  }
+
+  const onHomeClick = () => {
+    socket.emit("pre_disconnect", [typingMode, roomID])
+    dispatch(setRoomID(""))
   }
   
   return (
@@ -62,7 +80,7 @@ const PrivateLobby = () => {
           })}
       </Players>
       <ButtonContainer>
-        <button>Back</button>
+        <button onClick={onHomeClick}>Back</button>
         {roomOwner ? <button onClick={() => onStartClick()}>Start</button> : ""} {/* should only be able to start game if room owner */}
       </ButtonContainer>
     </Container>
