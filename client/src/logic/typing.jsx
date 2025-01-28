@@ -1,4 +1,4 @@
-export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, selectedType, selectedLength, isMultiplayer, hasRaceStarted, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine) => {
+export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, selectedType, selectedLength, isMultiplayer, hasRaceStarted, mistakesList, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine, addToMistakesList) => {
   if (isMultiplayer && !hasRaceStarted) { // user should not be able to type pre game
     e.preventDefault();
     return;
@@ -46,8 +46,15 @@ export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incor
 
   }
 
+
+      // check if user has typed anything wrong uptil this point
   if (currentlyTyped != typingText.substring(0, currentlyTyped.length)) {
-    // check if user has typed anything wrong uptil this point
+    const currentWord = typingText.split(" ")[wordsTyped];
+    // adds to mistakes list if it is not already in there
+    if (!mistakesList.includes(currentWord)) {
+      dispatch(addToMistakesList(currentWord))
+    } 
+
     if (incorrectText[1] == 0) {
       // check if this is first mistake and change the starting point of incorrect text
       updateIncorrectText[0] = currentlyTyped.length - 1;

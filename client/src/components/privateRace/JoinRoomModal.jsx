@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react'
 import styled from "styled-components"
 import { socket } from '../../Socket'
 import { useDispatch, useSelector } from 'react-redux'
-import { setJoiningRoom, setRoomID, setStartPrivateGame } from '../../redux/privateSlice'
+import { setJoiningRoom, setStartPrivateGame } from '../../redux/privateSlice'
+import { setRoomID } from '../../redux/multiplayerSlice'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faX } from '@fortawesome/free-solid-svg-icons'
 const JoinRoomModal = ({ }) => {
   const dispatch = useDispatch()
   const typingMode = useSelector((state) => state.typing.typingMode)
+
+  const user = useSelector((state) => state.user.user)
   const [errMessage, setErrMessage] = useState("")
+
 
   let id = ""
 
@@ -42,8 +46,10 @@ const JoinRoomModal = ({ }) => {
   const joinRoom = () => {
     socket.emit("join_private_room", id)
 
+    const username = user ? user.username : "Guest"
+
     const userData = {
-      username: "",
+      username: username,
       wpm: 0,
       currentWord: "",
       percentage: 0,
@@ -75,7 +81,7 @@ const Container = styled.div`
   position: absolute;
   height: 100vh;
   width: 100vw;
-  background: rgba(0,0,0,0.5);
+  background: ${({ theme: { colors } }) => colors.darkBackground};
   z-index: 10000;
   display: flex;
   justify-content: center;

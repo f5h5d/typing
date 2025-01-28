@@ -3,14 +3,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from "styled-components"
 import { setOtherPlayersData, setSocketID } from '../../redux/multiplayerSlice'
 import { socket } from '../../Socket'
-import { setRoomID, setStartPrivateGame } from '../../redux/privateSlice'
+import { setStartPrivateGame } from '../../redux/privateSlice'
+import { setRoomID } from '../../redux/multiplayerSlice'
 import { useNavigate } from 'react-router-dom'
 import { reset } from '../../redux/typingSlice'
+import { GAME_MODES } from '../../constants'
 const PrivateLobby = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const otherPlayersData = useSelector((state) => state.multiplayer.otherPlayersData)
-  const roomID = useSelector((state) => state.private.roomID)
+  const roomID = useSelector((state) => state.multiplayer.roomID)
   const roomOwner = useSelector((state) => state.private.roomOwner)
 
   const typingMode = useSelector((state) => state.typing.typingMode)
@@ -39,7 +41,6 @@ const PrivateLobby = () => {
 
     const onStartedGame = () => {
       dispatch(setStartPrivateGame(true))
-      socket.emit("track_user", [typingMode, roomID])
     }
     socket.on("initialize_user_id", onInitializeUserId)
 
@@ -60,9 +61,7 @@ const PrivateLobby = () => {
 
 
   const onStartClick = () => {
-      socket.emit("start_game", [typingMode, roomID])
-      socket.emit("track_user", [typingMode, roomID])
-      dispatch(setStartPrivateGame(true));
+    socket.emit("start_game", GAME_MODES.PRIVATE, roomID)
   }
 
   const onHomeClick = () => {
@@ -76,7 +75,7 @@ const PrivateLobby = () => {
       <Players>
         <Player><p>{roomOwner ? "Owner" : ""}(You)</p></Player>
         {Object.keys(otherPlayersData).map((id) => {
-            return <Player><p>{otherPlayersData[id].roomOwner ? "Owner" : ""} {otherPlayersData[id].username}</p></Player>
+            return <Player key={id}><p>{otherPlayersData[id].roomOwner ? "Owner" : ""} {otherPlayersData[id].username}</p></Player>
           })}
       </Players>
       <ButtonContainer>

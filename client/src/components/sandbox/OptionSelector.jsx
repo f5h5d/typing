@@ -80,6 +80,7 @@ const OptionSelector = ({ typingRef }) => {
 
   const wordsGetter = async (level, words) => {
     await axios.get(`http://localhost:5000/words/${level}/${words}`).then((response) => {
+      console.log(response.data)
       if (refillTypingText) {
         dispatch(setTypingBackgroundInfo({content: typingText + response.data.words, author: "Google"}))
         dispatch(setTypingText(typingText + " " + response.data.words))

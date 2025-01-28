@@ -12,9 +12,11 @@ import { setHasRaceStarted, setIsMultiplayer, setOtherPlayersData, setPreRaceTim
 import { socket } from "../../Socket";
 import OptionSelector from "../sandbox/OptionSelector";
 import { GAME_MODES } from "../../constants";
+import { useNavigate } from "react-router-dom";
 
-const PrivateRaceGame = ({ lookingForRoomRef }) => {
+const MainTypingGame = ({ lookingForRoomRef }) => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const finishedTest = useSelector((state) => state.typing.finishedTest);
   const wpm = useSelector((state) => state.typing.wpm);
   const wordsTyped = useSelector((state) => state.typing.wordsTyped)
@@ -25,8 +27,38 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
 
   const preRaceTimer = useSelector((state) => state.multiplayer.preRaceTimer)
   const hasRaceStarted = useSelector((state) => state.multiplayer.hasRaceStarted)
+  const roomID = useSelector((state) => state.multiplayer.roomID)
+
+
+  const user = useSelector((state) => state.user.user)
 
   const percentage = (wordsTyped / typingText.split(" ").length) * 100;
+
+
+  // for when user reloads => adds property to session storage to tell it reloaded after reload complete ==> should only happen for multiplayer mode
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (typingMode == GAME_MODES.MULTIPLAYER) { 
+        sessionStorage.setItem("reloadedPage", "true")
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [])
+
+
+  // checks if user reloaded, if they did then sends them back to the main page cuz in this page they are currently typing and after reload they should go back to main
+  useEffect(() => {
+    if (sessionStorage.getItem("reloadedPage") === 'true') {
+      navigate("/")
+      navigate(0);
+      sessionStorage.removeItem("reloadedPage");
+    }
+  }, [])
 
   useEffect(() => {
     const onInitializeTypingQuote = (data) => {
@@ -47,13 +79,15 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
     const onInitializeOtherUsersData = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
+
+        console.log(data[x])
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
+
       dispatch(setOtherPlayersData(users));
     }
     
     const onPreGameTimer = (data) => {
-      console.log(data)
       dispatch(setPreRaceTimer(data))
       if (data == -1) {
 
@@ -74,6 +108,7 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
     }
 
     const onUserFinishedPosition = (data) => {
+      console.log("RACE FINISHED")
       dispatch(setRacePlacement(data));
     }
 
@@ -101,10 +136,14 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
   }, [socket, dispatch]);
 
 
+  const username = user ? user.username : "Guest"
+
+
   useEffect(() => {
-    if (socket.id == undefined) return;
-    socket.emit("update_users_scores", {
-      username: socket.id,
+    console.log(roomID)
+    if (socket.id == undefined || !roomID) return; // return if socket doesnt exist yet or if roomID not assigneed yet
+    socket.emit("update_users_scores", typingMode, roomID, {
+      username: username,
       wpm: wpm,
       currentWord: typingText.split(" ")[wordsTyped],
       percentage: percentage,
@@ -113,9 +152,10 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
   }, [wpmRecord])
 
   useEffect(() => {
-    if (!finishedTest) return;
-    socket.emit("user_finished_test", {
-      username: socket.id,
+    if (!finishedTest || typingMode == GAME_MODES.SANDBOX) return;
+
+    socket.emit("user_finished_test", typingMode, roomID, {
+      username: username,
       wpm: wpm,
       currentWord: "",
       percentage: 100,
@@ -129,7 +169,8 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
       {finishedTest ? 
 
         <PostTypingContainer>
-          <NumberInfo />
+          
+          <NumberInfo/>
         </PostTypingContainer> 
         :
         <Container>
@@ -155,13 +196,13 @@ const PrivateRaceGame = ({ lookingForRoomRef }) => {
   );
 };
 
-export default PrivateRaceGame;
+export default MainTypingGame;
 
 const PreRaceTimer = styled.div`
   position: absolute;
   height: 100vh;
   width: 100vw;
-  background: rgba(0,0,0,0.5);
+  background: ${({ theme: { colors } }) => colors.darkBackground};
   z-index: 10000;
 
   display: flex;

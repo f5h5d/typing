@@ -15,7 +15,8 @@ import {
   setTypedAtAll,
   setRestart,
   setRefillTypingText,
-  setLastTyped
+  setLastTyped,
+  addToMistakesList
 } from "../../redux/typingSlice";
 import { checkBeforeKeyPress, updateText, getStyledText } from "../../logic/typing";
 
@@ -45,6 +46,8 @@ const TypingSection = ({ typingRef }) => {
   const wpm = useSelector((state) => state.typing.wpm)
   const selectedType = useSelector((state) => state.typing.selectedType)
   const selectedLength = useSelector((state) => state.typing.selectedLength)
+  const mistakesList = useSelector((state) => state.typing.mistakesList)
+
   const isMultiplayer = useSelector((state) => state.multiplayer.isMultiplayer)
   const preRaceTimer = useSelector((state) => state.multiplayer.preRaceTimer)
   const hasRaceStarted = useSelector((state) => state.multiplayer.hasRaceStarted)
@@ -127,7 +130,7 @@ const TypingSection = ({ typingRef }) => {
           </div>
           <textarea
             onBlur={(e) => e.target.focus()}
-            onChange={(e) => updateText(e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, selectedType, selectedLength, isMultiplayer, hasRaceStarted, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine)}
+            onChange={(e) => updateText(e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, selectedType, selectedLength, isMultiplayer, hasRaceStarted, mistakesList, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine, addToMistakesList)}
             onKeyDown={(e) => checkBeforeKeyPress(e, incorrectText, typingText, wordsTyped, isMultiplayer, hasRaceStarted, typingRef, typingTextRef, cursorRef, dispatch, setUserTyped, setIncorrectText, setLastTyped, setRestart)}
             onMouseDown={(e) => e.preventDefault()}
             autoFocus
@@ -160,7 +163,7 @@ const TypingText = styled.div`
   .typingArea {
     width: 50vw;
     height: 50px;
-    background: #0a0a0a;
+    background: ${({ theme: { colors } }) => colors.darkBackground};
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
     padding: 0 20px;
@@ -173,7 +176,7 @@ const TypingText = styled.div`
       height: 65%;
       border-radius: 10px;
       font-size: 15px;
-      background: #161515;
+      background: ${({ theme: { colors } }) => colors.mediumBackground};
       color: white;
       padding-left: 10px;
       
@@ -198,13 +201,13 @@ const TypingText = styled.div`
     flex-direction: row;
     flex-wrap: wrap;
     overflow: hidden;
-    height: 160px;
+    height: 180px;
     width: 50vw;
     max-width: 1000px;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
     padding: 10px 20px;
-    background: #161515;
+    background: ${({ theme: { colors } }) => colors.mediumBackground};
     letter-spacing: 0px;
     /* box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px; */
   }

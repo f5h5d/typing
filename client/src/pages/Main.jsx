@@ -7,10 +7,22 @@ import 'react-simple-keyboard/build/css/index.css';
 import { Link } from "react-router-dom"
 import axios from 'axios';
 import { setLookingForRoom, setMode } from '../redux/multiplayerSlice';
-import { useDispatch } from 'react-redux';
-import { GAME_MODES } from '../constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { API, GAME_MODES } from '../constants';
 const Main = () => {
   const dispatch = useDispatch()
+
+
+  const user = useSelector((state) => state.user.user)
+
+  useEffect(() => {
+    if (user) {
+      axios.get(`${API}/races/stats/${user.user_id}`).then((response) => {
+        console.log(response.data)
+      })
+    }
+  }, [])
+
 
 
   return (
@@ -23,49 +35,34 @@ const Main = () => {
       
       <Sections>
       <Section>
-          <div className="left-side">
+          <Link className="box">
             <FontAwesomeIcon className="icon shield" icon={faShield} />
             <div className="title">Ranked</div>
-          </div>
-          <div className="right-side">
-            <div className="button shield shield-button">Coming Soon!</div>
-          </div>
+          </Link>
         </Section>
         <Section>
-          <div className="left-side">
+          <Link className="box" to="/multiplayer" onClick={() => { dispatch(setMode(GAME_MODES.SANDBOX)); dispatch(setLookingForRoom(true))}}>
             <FontAwesomeIcon className="icon quote" icon={faQuoteLeft} />
             <div className="title">Multiplayer - Quotes</div>
-          </div>
-          <div className="right-side">
-          <Link to="/multiplayer" onClick={() => { dispatch(setMode(GAME_MODES.SANDBOX)); dispatch(setLookingForRoom(true))}}  className="button screw-driver-wrench">PLAY</Link>
-          </div>
+          </Link>
         </Section>
         <Section>
-          <div className="left-side">
+          <Link className="box" to="/multiplayer" onClick={() => dispatch(setMode(1))}>
             <FontAwesomeIcon className="icon book" icon={faBook} />
             <div className="title">Multiplayer - Words</div>
-          </div>
-          <div className="right-side">
-          <Link to="/multiplayer" onClick={() => dispatch(setMode(1))} className="button book">PLAY</Link>
-          </div>
+          </Link>
         </Section>
         <Section>
-          <div className="left-side">
+          <Link className="box" to="/private-race" onClick={() => dispatch(setMode(1))}>
             <FontAwesomeIcon className="icon book" icon={faLock} />
             <div className="title">Private Lobby</div>
-          </div>
-          <div className="right-side">
-          <Link to="/private-race" onClick={() => dispatch(setMode(1))} className="button book">PLAY</Link>
-          </div>
+          </Link>
         </Section>
         <Section>
-          <div className="left-side">
+          <Link className="box" to="/sandbox">
             <FontAwesomeIcon className="icon screw-driver-wrench" icon={faScrewdriverWrench} />
             <div className="title">Sandbox</div>
-          </div>
-          <div className="right-side">
-            <Link to="/sandbox" className="button screw-driver-wrench">PLAY</Link>
-          </div>
+          </Link>
         </Section>
       </Sections>
     </Container>
@@ -112,6 +109,19 @@ const Title = styled.div`
     80% { width: 100%; }
     100% { width: 0; }
   }
+
+
+  @media (max-width: 750px) {
+    .title {
+      font-size: 75px;
+    }
+  }
+
+  @media (max-width: 550px) {
+    .title {
+      font-size: 50px;
+    }
+  }
 `
 
 
@@ -124,10 +134,14 @@ const Sections = styled.div`
   justify-content: center;
   align-content: center;
 
-`
 
+  @media (max-width: 1200px) {
+    width: 80%;
+  }
+
+`
 const Section = styled.div`
-  height: 6vh;
+  height: 50px;
   width: 80vw;
   background: ${({ theme: { colors } }) => colors.lightBackground};
   border: 1px solid ${({ theme: { colors } }) => colors.black};
@@ -138,10 +152,16 @@ const Section = styled.div`
   align-items: center;
   font-weight: bold;
 
-  .left-side {
-    width: 80%;
+  &:hover {
+    background: ${({ theme: { colors } }) => colors.background};
+  }
+
+  .box {
+    width: 100%;
     display: flex;
-    align-items: center
+    align-items: center;
+    text-decoration: none;
+    color: ${({ theme: { colors } }) => colors.white}
   }
 
   .right-side {
@@ -203,102 +223,17 @@ const Section = styled.div`
     width: 110px;
     cursor: not-allowed;
   }
-`
-
-const Multiplayer = styled.div`
-  height: 20vh;
-  width: 25vw;
-  background: ${({ theme: { colors } }) => colors.lightBackground};
-  border: 1px solid ${({ theme: { colors } }) => colors.black};
-  border-radius: 0px;
-  margin: 10px 5px;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
 
 
-  .text-container {
-
-    width: 100%;
-    height: 30%;
-    display: flex;
-    align-items: center;
-    /* margin-left: 20px; */
-  }
-
-  .titles {
-    margin: 0 10px;
-  }
-
-  .title {
-    font-size: 25px;
-  }
-
-  .icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    padding: 10px;
-    background: ${({ theme: { colors } }) => colors.blue};
-    border-radius: 50%;
-  }
-
-  .left-icon {
-    margin-right: 20px;
-  }
-
-  .right-icon {
-    margin-left: 20px;
-  }
-
-  .subtitle {
-  }
-
-  .button-container {
-    width: 100%;
-    height: 30%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center !important;
-
-    .button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 30px;
-      width: 60px;
-      padding: 20px 80px;
-      border-radius: 10px;
-      background: ${({ theme: { colors } }) => colors.blue};
-    }
-
-    .left-button {
-      margin-right: 70px;
-    }
-
-    .right-button {
-      margin-left: 70px
+  @media (max-width: 1250px) {
+    .title {
+      font-size: 20px;
     }
   }
 
-  .right-align {
-    justify-content: flex-end;
-    text-align: right;
-  }
+  @media (max-width: 550px) {
 
-  .left-align {
-    justify-content: flex-start;
-    text-align: left !important;
   }
-`
-
-const SandBox = styled.div`
-  height: 20vh;
-  width: calc(80vw + 10px);
-  background: ${({ theme: { colors } }) => colors.lightBackground};
-  border: 1px solid ${({ theme: { colors } }) => colors.black};
-  border-radius: 00px;
 `
 
 export default Main

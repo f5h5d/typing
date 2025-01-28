@@ -13,3 +13,21 @@ TYPING SANDBOX
 MAKE SURE NO é CHARACTERS IN THE DICTIONARY TEXT
 
 WHEN YOU START A PRIVATE RACE IT DOESNT WORK AS INTENDED
+
+
+WHEN TWO USERS DO MULTIPLAYER AND DO ONE TOGETHER AND THEN SPLIT OFF WHERE ONE USER JOINS ANOTHER RACE AND THEN SECOND USER JOINS A DIFFERENT RACE AT 0 SECONDS FOR THE FIRST USER, THE BOTS START TWEAKING TF OUT
+
+
+
+
+THINGS TO DO:
+- fix all bugs that are going to appear for private rooms (DONEEEEEEEEE)
+- fix bots for not signed in users (DONEEEEEEEEE)
+- when private room leader leaves, it should assign a new leader
+ 
+
+
+BUGS TO FIX:
+- Sometimes typing text is not same for all users (DONEEEEEEEEE)
+  * sometimes it doesnt even appear (DONEEEEEEEEE)
+- Pressing next race for private race is completely bugged, and also it allows people that are not the leader to start new race...  (DONEEEEEEEEE)

@@ -10,6 +10,7 @@ const initialState = {
   racePlacement: 0,
   preRaceTimer: -1, // -1 means that no timer currently
   hasRaceStarted: false,
+  roomID: 0, 
 };
 
 const multiplayerSlice = createSlice({
@@ -40,6 +41,9 @@ const multiplayerSlice = createSlice({
     setHasRaceStarted: (state, action) => {
       state.hasRaceStarted = action.payload;
     },
+    setRoomID: (state, action) => {
+      state.roomID = action.payload;
+    },
 
 
     setOtherPlayersData: (state, action) => {
@@ -52,6 +56,7 @@ const multiplayerSlice = createSlice({
       state.racePlacement = initialState.racePlacement
       state.preRaceTimer = initialState.preRaceTimer
       state.hasRaceStarted = initialState.hasRaceStarted
+      state.roomID = initialState.roomID
     }
   },
 });
@@ -67,7 +72,8 @@ export const {
   setPreRaceTimer,
   setHasRaceStarted,
   setIsMultiplayer,
-  nextRaceMultiplayerReset
+  nextRaceMultiplayerReset,
+  setRoomID
   // reset,
 } = multiplayerSlice.actions;
 
