@@ -27,6 +27,11 @@ const initialState = {
   refillTypingText: 0, // this is for when user is doing timed test and if user has typed almost all of the typing text and more is needed (adds by 1 every time)
   lastTyped: 0, // this is a date, used for checking if user has typed in the last 10 seconds if not it voids the test
   restart: false,
+  savedData: false,
+
+  reloadedPage: false,
+
+  mistakesList: [], 
 };
 
 const typingSlice = createSlice({
@@ -108,9 +113,21 @@ const typingSlice = createSlice({
     setLastTyped: (state, action) => {
       state.lastTyped = action.payload;
     },
+    setSavedData: (state, action) => {
+      state.savedData = action.payload;
+    },
+
+    setReloadedPage: (state, action) => {
+      state.reloadedPage = action.payload;
+    },
+
+    addToMistakesList: (state, action) => {
+      state.mistakesList.push(action.payload);
+    },
     reset: (state) => {
       state.typingText = initialState.typingText
       state.userTyped = initialState.userTyped;
+      // state.mistakesList = initialState.mistakesList
       state.incorrectText = initialState.incorrectText;
       state.wordsTyped = initialState.wordsTyped;
       state.wpm = initialState.wpm;
@@ -180,8 +197,11 @@ export const {
   setCurrentSelection,
   setRefillTypingText,
   setLastTyped,
+  addToMistakesList,
+  setReloadedPage,
   reset,
   backToLobbyReset,
+  setSavedData,
 } = typingSlice.actions;
 
 export default typingSlice.reducer;

@@ -84,7 +84,7 @@ const Percentage = styled.div`
     /* font-weight: bold; */
     /* width: 70px; */
     text-align: center;
-    background: #161515;
+    background: ${({ theme: { colors } }) => colors.mediumBackground};
     padding: 5px 10px;
     border-radius: 10px;
     font-size: 15px;

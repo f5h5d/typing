@@ -2,7 +2,8 @@ import { faMagnifyingGlass, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setJoiningRoom, setRoomID, setRoomOwner } from "../../redux/privateSlice"
+import { setJoiningRoom, setRoomOwner } from "../../redux/privateSlice"
+import { setRoomID } from '../../redux/multiplayerSlice'
 import styled from "styled-components"
 import { socket } from '../../Socket'
 import JoinRoomModal from './JoinRoomModal'
@@ -11,7 +12,11 @@ import JoinRoomModal from './JoinRoomModal'
 const PrivateLobbyChooser = () => {
   const dispatch = useDispatch()
   const joiningRoom = useSelector((state) => state.private.joiningRoom)
-  const roomID = useSelector((state) => state.private.roomID)
+  const roomID = useSelector((state) => state.multiplayer.roomID)
+
+  const user = useSelector((state) => state.user.user)
+
+  const guestWpm = useSelector((state) => state.guestUser.guestWpm)
 
   const TYPING_MODE = 2;
 
@@ -30,14 +35,20 @@ const PrivateLobbyChooser = () => {
       dispatch(setRoomOwner(true))
       dispatch(setRoomID(id))
 
+      const username = user ? user.username : "Guest"
+      const averageWPM = user ? user.averageWPM : guestWpm // CHECK
+      
       const userData = {
-        username: "",
+        username: username,
         wpm: 0,
         currentWord: "",
         percentage: 0,
         id: "",
         roomOwner: false,
+        averageWpm: averageWPM,
       }
+
+
 
       socket.emit("join_room", [id, TYPING_MODE, userData])
     }

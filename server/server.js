@@ -1,12 +1,17 @@
+require('dotenv').config(); // for env file
 const express = require("express");
-const userRoutes = require("./routes/words");
+const wordRoutes = require("./src/routes/words");
+const authRoutes = require("./src/routes/auth");
+const raceRoutes = require("./src/routes/races");
 const app = express();
 const cors = require("cors"); // for giving frontend permission
-const { client } = require("./config/database");
+const { client } = require("./src/config/database");
 const http = require("http");
 const { Server } = require("socket.io");
-const setUpSocket = require("./socket/socket")
+const setUpSocket = require("./src/socket/socket")
 const server = http.createServer(app);
+const cookieParser = require("cookie-parser")
+
 
 
 
@@ -32,8 +37,15 @@ setUpSocket(io)
 // allow front end to use server
 app.use(cors(corsOptions));
 
+// middleware
+app.use(express.json())
+app.use(cookieParser());
+app.use(express.urlencoded({extended: false}))
+
 // Routes
-app.use("/words", userRoutes);
+app.use("/words", wordRoutes);
+app.use("/auth", authRoutes);
+app.use("/races", raceRoutes)
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

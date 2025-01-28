@@ -22,10 +22,40 @@ const lightTheme = {
   }
 };
 
+// const darkTheme = {
+//   colors: {
+//     background : "#121212",
+//     lightBackground: "#242424",
+//     text: '#dfebf8',
+//     textDark: "#36424f",
+//     blue: '#007BFF',
+//     orange: '#FFA500',
+//     green: "#4CAF50",
+//     purple: "#8A2BE2",
+//     red: "#FF4D4D",
+//     white: '#FFFFFF',
+//     black: "#000",
+//     gray: '#E5E7EB',
+//     darkGray: '#111827',
+//     sidebar: "#1f1e1e",
+//     sidebarHover: "#0a0a0a",
+//     sidebarBorder: '#000'
+//   },
+//   fonts: ["sans-serif", "Roboto"],
+//   fontSizes: {
+//     small: "1em",
+//     medium: "2em",
+//     large: "3em"
+//   }
+// };
+
+
 const darkTheme = {
   colors: {
     background : "#121212",
+    mediumBackground: "#161515",
     lightBackground: "#242424",
+    darkBackground: "#0a0a0a",
     text: '#dfebf8',
     textDark: "#36424f",
     blue: '#007BFF',
@@ -39,7 +69,9 @@ const darkTheme = {
     darkGray: '#111827',
     sidebar: "#1f1e1e",
     sidebarHover: "#0a0a0a",
-    sidebarBorder: '#000'
+    sidebarBorder: '#000',
+    trophy: "#FFD700",
+    trophyBackground: "#b09709"
   },
   fonts: ["sans-serif", "Roboto"],
   fontSizes: {

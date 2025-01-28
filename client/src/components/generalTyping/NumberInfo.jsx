@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import CountUp from 'react-countup';
@@ -7,10 +7,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy } from '@fortawesome/free-solid-svg-icons';
 import { nextRacePrivateReset, setStartPrivateGame } from '../../redux/privateSlice';
-import { reset } from '../../redux/typingSlice';
+import { reset, setSavedData } from '../../redux/typingSlice';
 import { socket } from '../../Socket';
 import { nextRaceMultiplayerReset, setHasRaceStarted } from '../../redux/multiplayerSlice';
-import { GAME_MODES } from '../../constants';
+import { API, GAME_MODES } from '../../constants';
+import axios from 'axios';
+import { setGuestAccuracy, setGuestWpm, updateGuestGamesPlayed } from '../../redux/guestUserSlice';
   
 const NumberInfo = () => {
   
@@ -24,12 +26,21 @@ const NumberInfo = () => {
   const selectedLength = useSelector((state) => state.typing.selectedLength)
   const wordsTyped = useSelector((state) => state.typing.wordsTyped)
   const typingMode = useSelector((state) => state.typing.typingMode)
+  const savedData = useSelector((state) => state.typing.savedData)
+  const mistakesList = useSelector((state) => state.typing.mistakesList)
 
 
   const roomOwner = useSelector((state) => state.private.roomOwner);
-  const roomID = useSelector((state) => state.private.roomID)
+  const roomID = useSelector((state) => state.multiplayer.roomID)
 
   const racePlacement = useSelector((state) => state.multiplayer.racePlacement)
+
+  const user = useSelector((state) => state.user.user)
+
+
+  const guestWpm = useSelector((state) => state.guestUser.guestWpm)
+  const guestAccuracy = useSelector((state) => state.guestUser.guestAccuracy)
+  const guestGamesPlayed = useSelector((state) => state.guestUser.guestGamesPlayed)
 
   const prompts = ["WPM", "Accuracy", "Time", "Mistakes"]
 
@@ -38,12 +49,46 @@ const NumberInfo = () => {
       socket.emit("pre_disconnect", [typingMode, roomID])
       socket.disconnect();
     }
+    dispatch(nextRaceMultiplayerReset())
     dispatch(reset())
     navigate("/")
   }
+
+  // wpm, accuracy, time, mistakes
   const values = [wpmRecord[wpmRecord.length-1].wpm, Math.round(((typingText.length / (typingText.length + mistakes)) * 100)*100) / 100, wpmRecord[wpmRecord.length-1].time, mistakes]
   let lowerDomain = wpmRecord.find(({wpm}) => wpm < 25) == undefined ? "dataMin - 25" : 0 // if user has wpm lower than 25 then y axis would go into negatives
 
+
+  useEffect(() => {
+
+    if (racePlacement == 0 || typingMode == GAME_MODES.SANDBOX ) return; // the race placement updates after this runs so without this it would just have race placement = 0 for all
+    
+    if (!user) { // if guest user
+      const newGuestWpm = Math.round((guestWpm * guestGamesPlayed + values[0]) / (guestGamesPlayed + 1))
+      const newGuestAccuracy = Math.round((guestAccuracy * guestGamesPlayed + parseInt(values[1])) / (guestGamesPlayed + 1))
+      dispatch(updateGuestGamesPlayed(1))
+      dispatch(setGuestAccuracy(newGuestAccuracy))
+      dispatch(setGuestWpm(newGuestWpm))
+    }
+
+    if (!user || typingMode == GAME_MODES.SANDBOX || savedData ) return;
+
+    const info = {
+      user_id: user.id,
+      words_id: typingBackgroundInfo.words_id,
+      quote_id: null,
+      wpm: values[0],
+      accuracy: Math.round(values[1]),
+      duration: values[2],
+      mistakes: mistakesList,
+      won: racePlacement == 1,
+      ranked: false,
+    }
+
+    dispatch(setSavedData(true))
+    axios.post(`${API}/races/track`, info, { withCredentials: true }).then((response) => {
+    })
+  }, [racePlacement])
 
   let typedText = ""
   if (selectedType == 0 || selectedLength < 4) typedText = typingBackgroundInfo.content; // if not timed trial then user has typed all the text
@@ -62,16 +107,25 @@ const NumberInfo = () => {
     dispatch(reset())
     
     if (typingMode == GAME_MODES.MULTIPLAYER) { // multiplayer
-      socket.emit("join_room", [roomID, GAME_MODES.MULTIPLAYER, userData])
+      dispatch(nextRaceMultiplayerReset())
+
+      const username = user ? user.username : "Guest"
+      const averageWPM = user ? user.averageWPM : guestWpm // need to change 
+      const userData = {
+        username: username,
+        wpm: 0,
+        currentWord: typingText.split(" ")[0],
+        percentage: 0,
+        id: "",
+        averageWPM: averageWPM
+      }
+      socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData])
     }
 
     else if (typingMode == GAME_MODES.PRIVATE) { 
-      dispatch(setHasRaceStarted(false));
       socket.emit("reset_game_values", roomID)
-      socket.emit("start_game", [typingMode, roomID])
+      socket.emit("start_game", GAME_MODES.PRIVATE, roomID)
     }
-
-
   }
 
   return (
@@ -138,9 +192,9 @@ const NumberInfo = () => {
         </RightSideContainer >
       </MainContent>
       <Buttons>
-        <div onClick={onHomeClick}  className="button home">Home</div>
-        { typingMode == GAME_MODES.PRIVATE && roomOwner ? <div className="button" onClick={onBackToLobby}>Back To Lobby</div> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
-        <Link className="button next-race" onClick={onNextRace}>Next Race</Link>
+        <button onClick={onHomeClick} className="button">Home</button>
+        { typingMode == GAME_MODES.PRIVATE && roomOwner ? <button className="button" onClick={onBackToLobby}>Back To Lobby</button> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
+        { typingMode != GAME_MODES.PRIVATE || (typingMode == GAME_MODES.PRIVATE && roomOwner) ? <button className="button next-race" onClick={onNextRace}>Next Race</button> : ""} {/* people in private lobby should not be able to start game, only lobby owner*/}
       </Buttons>
     </Container>
   )
@@ -148,16 +202,19 @@ const NumberInfo = () => {
 
 
 const Buttons = styled.div`
-  /* position: relative; */
 
   top: 30px;
   width: 90vw;
+  height: 50px;
 
   display: flex;
 
   justify-content: space-between;
 
+  align-items: center;
+
   .button {
+    position: relative !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -170,6 +227,7 @@ const Buttons = styled.div`
     background: ${({ theme: { colors } }) => colors.blue};
     color: ${({ theme: { colors } }) => colors.white};
     box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+    cursor: pointer;
   }
 
   .home {
@@ -255,7 +313,7 @@ const RightSideContainer = styled.div`
   .text {
     width: 85%;
     height: 50%;
-    background: #191919;
+    background: ${({ theme: { colors } }) => colors.mediumBackground};
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     margin-top: 10px;
@@ -271,7 +329,7 @@ const RightSideContainer = styled.div`
     align-items: center;
     width: 85%;
     height: 10%;
-    background: #161515;
+    background: ${({ theme: { colors } }) => colors.mediumBackground};
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     padding: 10px 20px;
@@ -342,10 +400,10 @@ const NumberInfoContainer = styled.div`
     font-size: 35px;
     top: -10px;
     right: -10px;
-    color: #FFD700;
+    color: ${({ theme: { colors } }) => colors.trophy};
     transform: rotate(25deg);
     padding: 10px;
-    background: #b09709;
+    background: ${({ theme: { colors } }) => colors.trophyBackground};
     border-radius: 50%;
   }
 

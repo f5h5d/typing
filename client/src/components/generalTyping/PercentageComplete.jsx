@@ -13,6 +13,8 @@ const PercentageComplete = () => {
 
   const socketID = useSelector((state) => state.multiplayer.socketID)
 
+  const user = useSelector((state) => state.user.user)
+
   let percent = 0
   if (selectedType == 0 || (selectedType == 1 && selectedLength < 4)) { // if percent should be based on words completed
     percent = (wordsTyped / typingText.split(" ").length) * 100;
@@ -33,7 +35,7 @@ const PercentageComplete = () => {
           </div>
         </div>
         <div className="username-container">
-          <p className="username">{socketID}</p>
+          <p className="username">{user == null ? "Guest" : user.username}</p>
         </div>
       </Percentage>
     </PercentageCompleteContainer>
@@ -75,7 +77,7 @@ const Percentage = styled.div`
     /* font-weight: bold; */
     /* width: 70px; */
     text-align: center;
-    background: #161515;
+    background: ${({ theme: { colors } }) => colors.mediumBackground};
     padding: 5px 10px;
     border-radius: 10px;
     font-size: 15px;
