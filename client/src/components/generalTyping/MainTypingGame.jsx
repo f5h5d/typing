@@ -34,11 +34,20 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
 
   const percentage = (wordsTyped / typingText.split(" ").length) * 100;
 
+  const userStats = useSelector((state) => state.user.userStats)
+
+  const typingModeRef = useRef(null)
+  
+  useEffect(() => {
+    typingModeRef.current = typingMode
+  }, [typingMode])
+
+
 
   // for when user reloads => adds property to session storage to tell it reloaded after reload complete ==> should only happen for multiplayer mode
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (typingMode == GAME_MODES.MULTIPLAYER) { 
+      if (typingModeRef.current == GAME_MODES.MULTIPLAYER) { 
         sessionStorage.setItem("reloadedPage", "true")
       }
     }
@@ -48,7 +57,7 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload)
     }
-  }, [])
+  }, [typingModeRef])
 
 
   // checks if user reloaded, if they did then sends them back to the main page cuz in this page they are currently typing and after reload they should go back to main
@@ -79,8 +88,6 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
     const onInitializeOtherUsersData = (data) => {
       const users = {};
       for (let x in data) { // loop through and keep everyone but the user 
-
-        console.log(data[x])
         if(data[x].id !== socket.id) users[data[x].id] = data[x]
       }
 
@@ -140,14 +147,13 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
 
 
   useEffect(() => {
-    console.log(roomID)
     if (socket.id == undefined || !roomID) return; // return if socket doesnt exist yet or if roomID not assigneed yet
     socket.emit("update_users_scores", typingMode, roomID, {
       username: username,
       wpm: wpm,
       currentWord: typingText.split(" ")[wordsTyped],
       percentage: percentage,
-      id: socket.id
+      id: socket.id,
     });
   }, [wpmRecord])
 
@@ -164,6 +170,9 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
   }, [finishedTest])
 
 
+
+
+
   return (
     <>
       {finishedTest ? 
@@ -177,9 +186,9 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
           {!hasRaceStarted && typingMode !== GAME_MODES.SANDBOX ? (
             <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
           ) : ""}
-            <PercentageCompleteSection>
+          <PercentageCompleteSection>
             <PercentageComplete />
-            <OtherPlayersPercentageComplete typingRef={typingRef} />
+            <OtherPlayersPercentageComplete typingRef={typingRef}/>
           </PercentageCompleteSection>
           <TypingContainer>
             <TypingTracker />

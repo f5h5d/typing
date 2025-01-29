@@ -9,10 +9,10 @@ import PrivateRace from './pages/PrivateRace'
 import SignUp from './components/authentication/SignUp'
 import Login from './components/authentication/Login'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchUser, setUser } from './redux/userSlice'
+import { fetchUser, setUser, setUserStats } from './redux/userSlice'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
-import { API } from './constants'
+import { API, GUEST_USER_DEFAULT_WPM } from './constants'
 
 function App() {
   const [openSignUpModal, setOpenSignUpModal] = useState(false)
@@ -20,23 +20,59 @@ function App() {
   const dispatch = useDispatch();
 
   const user = useSelector((state) => state.user.user);
+  const userStats = useSelector((state) => state.user.userStats)
   const loading = useSelector((state) => state.user.loading);
 
   useEffect(() => {
     dispatch(fetchUser())
-    
-
-
   }, [dispatch])
+
+
+  // if is a guest user
+  useEffect(() => {
+    if (!user) {
+      const userStatInfo = {
+        averageWpm: GUEST_USER_DEFAULT_WPM,
+        averageAccuracy: 0,
+        totalRaces: 0,
+        highestWpm: 0,
+        racesWon: 0,
+        mostRecentWpm: 0,
+        lastTenRacesWpm: 0,
+        lastTenRacesAccuracy: 0,
+        guest: true,
+      }
+
+      dispatch(setUserStats({...userStatInfo}))
+    }
+  }, [])
 
   // get user wpm and acc data once actual user is loaded
   useEffect(() => {
-    if (user && !user.averageWPM) {
+    if (user && userStats.guest) {
       axios.get(`${API}/races/stats/${user.id}`).then(response => {
-        dispatch(setUser({...user, averageWPM: response.data.wpm}))
+
+      const { averageWpm, averageAccuracy, totalRaces, highestWpm, totalRacesWon, mostRecentWpm, lastTenRacesWpm, lastTenRacesAccuracy } = response.data;
+      const userStatInfo = {
+        averageWpm,
+        averageAccuracy,
+        totalRaces,
+        highestWpm,
+        totalRacesWon,
+        mostRecentWpm,
+        lastTenRacesWpm,
+        lastTenRacesAccuracy,
+        guest: false,
+      }
+        dispatch(setUser({...user, ...response.data}))
+        dispatch(setUserStats({...userStatInfo}))
+
+        console.log(userStatInfo)
       }) 
+
+
     }
-  }, [user])
+  }, [user, userStats])
 
 
 

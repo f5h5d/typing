@@ -18,19 +18,22 @@ const Multiplayer = () => {
 
   const dispatch = useDispatch()
   const typingText = useSelector((state) => state.typing.typingText)
-
   const typingMode = useSelector((state) => state.typing.typingMode)
-  const roomID = useSelector((state) => state.multiplayer.roomID)
+  const finishedTest = useSelector((state) => state.typing.finishedTest)
 
+  const roomID = useSelector((state) => state.multiplayer.roomID)
   const lookingForRoom = useSelector((state) => state.multiplayer.lookingForRoom)
 
   const guestWpm = useSelector((state) => state.guestUser.guestWpm)
+  const guestAccuracy = useSelector((state) => state.guestUser.guestAccuracy)
+  const guestTotalRaces = useSelector((state) => state.guestUser.guestTotalRaces)
 
-  const lookingForRoomRef = useRef(lookingForRoom)
 
   const user = useSelector((state) => state.user.user)
+  const userStats = useSelector((state) => state.user.userStats)
 
-  const finishedTest = useSelector((state) => state.typing.finishedTest)
+
+  const lookingForRoomRef = useRef(lookingForRoom)
 
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
@@ -58,19 +61,18 @@ const Multiplayer = () => {
     if (!lookingForRoomRef.current) return;
 
 
-    const username = user ? user.username : "Guest" // checks if user is signed in and gives that username, otherwise uses Guest
-    const averageWPM = user ? user.averageWPM : guestWpm // if user is signed in use their average wpm otherwise use the default value
+    const username = user?.username || "Guest" // checks if user is signed in and gives that username, otherwise uses Guest
+
     const userData = {
       username: username,
       wpm: 0,
       currentWord: typingText.split(" ")[0],
       percentage: 0,
       id: "",
-      averageWPM: averageWPM
+      ...userStats
     }
 
 
-    console.log(finishedTest) // NOT THE REASON
     socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData])
     lookingForRoomRef.current = false;
     return () => {

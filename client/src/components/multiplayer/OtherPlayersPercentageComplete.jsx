@@ -6,19 +6,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { reset, setTypingBackgroundInfo, setTypingText } from "../../redux/typingSlice";
 const OtherPlayersPercentageComplete = ({ typingRef }) => {
   const dispatch = useDispatch();
-  const mode = useSelector((state) => state.multiplayer.mode);
-  const wpm = useSelector((state) => state.typing.wpm);
-  const wordsTyped = useSelector((state) => state.typing.wordsTyped)
-  const typingText = useSelector((state) => state.typing.typingText)
-  const wpmRecord = useSelector((state) => state.typing.wpmRecord)
-  const finishedTest = useSelector((state) => state.typing.finishedTest)
-  const otherPlayersData = useSelector(
-    (state) => state.multiplayer.otherPlayersData
-  );
+  
+  const otherPlayersData = useSelector( (state) => state.multiplayer.otherPlayersData );
+  const userStats = useSelector( (state) => state.user.userStats)
 
 
 
+  const onOtherPlayerHover = (data) => {
+    // e.preventDefault();
+    // e.stopPropogation();
 
+    console.log(data)
+  }
 
 
 
@@ -27,7 +26,7 @@ const OtherPlayersPercentageComplete = ({ typingRef }) => {
       {Object.keys(otherPlayersData).map((data, index) => {
         const { wpm, currentWord, percentage, username } = otherPlayersData[data];
         return (
-          <PercentageCompleteContainer key={index}>
+          <PercentageCompleteContainer key={index} onMouseOver={(e) => onOtherPlayerHover(otherPlayersData[data])}>
             <Percentage percent={percentage}>
               <div className="wpm-container">
                 <p className="wpm">{wpm} wpm</p>
