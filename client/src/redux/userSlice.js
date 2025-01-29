@@ -20,7 +20,8 @@ const initialState = {
   user: null, 
   guestUser: null,
   loading: false,
-  error: null
+  error: null,
+  userStats: {}
 };
 
 const userSlice = createSlice({
@@ -30,6 +31,9 @@ const userSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
     },
+    setUserStats: (state, action) => {
+      state.userStats = action.payload;
+    }
   },
   extraReducers: (builder) => { // extraReducers used for asyncThunk and its life cycle - runs when the thunk is loading (pending), when it has been fulfilled (completed) and if the request was rejected (failed)
     builder
@@ -53,7 +57,8 @@ const userSlice = createSlice({
 
 
 export const {
-  setUser
+  setUser,
+  setUserStats
   // reset,
 } = userSlice.actions;
 

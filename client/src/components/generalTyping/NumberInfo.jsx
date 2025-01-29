@@ -12,7 +12,7 @@ import { socket } from '../../Socket';
 import { nextRaceMultiplayerReset, setHasRaceStarted } from '../../redux/multiplayerSlice';
 import { API, GAME_MODES } from '../../constants';
 import axios from 'axios';
-import { setGuestAccuracy, setGuestWpm, updateGuestGamesPlayed } from '../../redux/guestUserSlice';
+import { setGuestAccuracy, setGuestWpm, updateGuestRacesWon, updateGuestTotalRaces, setGuestHighestWpm, setGuestMostRecentWpm } from '../../redux/guestUserSlice';
   
 const NumberInfo = () => {
   
@@ -36,11 +36,15 @@ const NumberInfo = () => {
   const racePlacement = useSelector((state) => state.multiplayer.racePlacement)
 
   const user = useSelector((state) => state.user.user)
+  const userStats = useSelector((state) => state.user.userStats)
 
 
   const guestWpm = useSelector((state) => state.guestUser.guestWpm)
   const guestAccuracy = useSelector((state) => state.guestUser.guestAccuracy)
-  const guestGamesPlayed = useSelector((state) => state.guestUser.guestGamesPlayed)
+  const guestTotalRaces = useSelector((state) => state.guestUser.guestTotalRaces)
+  const guestHighestWpm = useSelector((state) => state.guestUser.guestHighestWpm)
+  const guestRacesWon = useSelector((state) => state.guestUser.guestRacesWon)
+  const guestMostRecentWpm = useSelector((state) => state.guestUser.guestMostRecentWpm)
 
   const prompts = ["WPM", "Accuracy", "Time", "Mistakes"]
 
@@ -64,11 +68,17 @@ const NumberInfo = () => {
     if (racePlacement == 0 || typingMode == GAME_MODES.SANDBOX ) return; // the race placement updates after this runs so without this it would just have race placement = 0 for all
     
     if (!user) { // if guest user
-      const newGuestWpm = Math.round((guestWpm * guestGamesPlayed + values[0]) / (guestGamesPlayed + 1))
-      const newGuestAccuracy = Math.round((guestAccuracy * guestGamesPlayed + parseInt(values[1])) / (guestGamesPlayed + 1))
-      dispatch(updateGuestGamesPlayed(1))
-      dispatch(setGuestAccuracy(newGuestAccuracy))
-      dispatch(setGuestWpm(newGuestWpm))
+      const previousRaceWpm = values[0];
+      const previousRaceAccuracy = values[1];
+      const newAverageGuestWpm = Math.round((guestWpm * guestTotalRaces + previousRaceWpm) / (guestTotalRaces + 1))
+      const newAverageGuestAccuracy = Math.round((guestAccuracy * guestTotalRaces + parseInt(previousRaceAccuracy)) / (guestTotalRaces + 1))
+      // check if guest user won and update the stat if they did
+      if (racePlacement == 1) dispatch(updateGuestRacesWon(1))
+      if (previousRaceWpm > guestHighestWpm) dispatch(setGuestHighestWpm(newAverageGuestWpm))
+      dispatch(setGuestMostRecentWpm(previousRaceWpm))
+      dispatch(updateGuestTotalRaces(1))
+      dispatch(setGuestAccuracy(newAverageGuestAccuracy))
+      dispatch(setGuestWpm(newAverageGuestWpm))
     }
 
     if (!user || typingMode == GAME_MODES.SANDBOX || savedData ) return;
@@ -108,16 +118,16 @@ const NumberInfo = () => {
     
     if (typingMode == GAME_MODES.MULTIPLAYER) { // multiplayer
       dispatch(nextRaceMultiplayerReset())
+    
 
-      const username = user ? user.username : "Guest"
-      const averageWPM = user ? user.averageWPM : guestWpm // need to change 
+      const username = user?.username || "Guest"
       const userData = {
         username: username,
         wpm: 0,
         currentWord: typingText.split(" ")[0],
         percentage: 0,
         id: "",
-        averageWPM: averageWPM
+        ...userStats
       }
       socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData])
     }

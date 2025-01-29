@@ -47,7 +47,12 @@ router.post("/login", async (req, res) => {
     if (match) {
       jwt.sign({email: userData.email, id: userData.user_id, username: userData.username}, process.env.JWT_SECRET, {expiresIn: "30d"}, (err, token) => {
         if (err) throw err;
-        res.cookie('token', token).json({email: userData.email, id: userData.user_id, username: userData.username})
+        res.cookie('token', token, {
+          // httpOnly: true, // Helps prevent XSS attacks
+          // secure: process.env.NODE_ENV === 'production', // Use secure cookies in production (HTTPS only)
+          // sameSite: 'strict', // Helps prevent CSRF
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        }).json({email: userData.email, id: userData.user_id, username: userData.username})
       })
     } else {
       res.json({error: "User not found"})

@@ -73,7 +73,7 @@ module.exports = (io) => {
         for (let [key, value] of rooms) {
           if (
             value.preGameTimer > USER_JOIN_TIMER_LIMIT && // make sure the time is not too low
-            Math.abs(userData.averageWPM - value.roomAverageWPM) < MAX_UPPER_LOWER_WPM_RANGE && // make sure user is in the "skill" range for the lobby
+            Math.abs(userData.averageWpm - value.roomAverageWpm) < MAX_UPPER_LOWER_WPM_RANGE && // make sure user is in the "skill" range for the lobby
             Object.keys(value.usersData).length < MAX_USERS_PER_GAME // number of players less than the max 
           ) {
             roomID = key;
@@ -98,7 +98,7 @@ module.exports = (io) => {
             usersData: {},
             preGameTimer: PREGAME_TIMER,
             id: roomID,
-            roomAverageWPM: 0,
+            roomAverageWpm: 0,
           }); // usersCompleted stores id/username of users that have finished in order
           io.to(roomID).emit("pre_game_timer", rooms.get(roomID).preGameTimer); // tell all clients to set the pregame timer
           socket.emit("user_must_start_game", roomID); // ADD LATER
@@ -109,22 +109,21 @@ module.exports = (io) => {
 
       socket.join(roomID);
 
-      // console.log(io.sockets.adapter.rooms.get(roomID))
-      console.log(io.sockets.adapter.rooms)
       // Add new player to the room
 
       room.usersData["" + socket.id] = { ...userData, id: socket.id }; // update the data in the backend
-      room.roomAverageWPM = Math.round(
-        (room.roomAverageWPM * (Object.keys(room.usersData).length - 1) +
-          userData.averageWPM) /
+      room.roomAverageWpm = Math.round(
+        (room.roomAverageWpm * (Object.keys(room.usersData).length - 1) +
+          userData.averageWpm) /
           Object.keys(room.usersData).length
       );
       socket.to(roomID).emit("initialize_user_data_for_others", room.usersData); // give new user data of previous users
 
       socket.emit("initialize_user_id", socket.id); // give the client the socketID
+
       socket.emit("initialize_other_users_data", room.usersData);
 
-      if (mode !== 2 && Object.keys(rooms.get(roomID).usersData).length == 1) {
+      if (mode !== GAME_MODES.PRIVATE && Object.keys(rooms.get(roomID).usersData).length == 1) {
         // this user is first user in public lobby they in the room => must start it
         socket.emit("tell_user_to_start_game", roomID);
       }
@@ -175,7 +174,15 @@ module.exports = (io) => {
               currentWord: "",
               percentage: 0,
               id: i,
-              averageWPM: room.roomAverageWPM + wpmIntervals[i]
+              averageWpm: room.roomAverageWpm + wpmIntervals[i],
+              averageAccuracy: 0,
+              totalRaces: 0,
+              highestWpm: 0,
+              totalRacesWon: 0,
+              mostRecentWpm: 0,
+              lastTenRacesWpm: 0,
+              lastTenRacesAccuracy: 0,
+              guest: false,
             }
           }
 
@@ -204,7 +211,7 @@ module.exports = (io) => {
             const user = room.usersData[id]
             if (user.username == BOT_NAME && user.percentage < 100) {
 
-              charactersWritten = Math.round((user.averageWPM * 5 * elapsedTime) / 60)
+              charactersWritten = Math.round((user.averageWpm * 5 * elapsedTime) / 60)
               const text = roomsTextCache.get(roomID).words // CHANGE TO TEXT LATER (roomsTextCache.get(roomID).text)
 
 
@@ -253,7 +260,9 @@ module.exports = (io) => {
         ? rooms.get(roomID)
         : privateRooms.get(roomID);
 
-      room.usersData["" + data.id] = data;
+      if (!room) return; // when user leaves the race at the wrong time this can cause an error so this is to stop that
+
+      room.usersData["" + data.id] = {...room.usersData["" + data.id], ...data}; // update the essential data
       socket.to(roomID).emit("update_users_data", room.usersData);
     });
 
@@ -263,6 +272,8 @@ module.exports = (io) => {
       mode == GAME_MODES.MULTIPLAYER
         ? rooms.get(roomID)
         : privateRooms.get(roomID);
+
+      if (!room) return; // sometimes when user reloads this runs so this is to counter that
         
       room.usersCompleted.push(socket.id);
       socket.emit("user_finished_position", room.usersCompleted.length);
@@ -294,13 +305,6 @@ module.exports = (io) => {
     });
 
     socket.on("reset_game_values", (roomID) => {
-      // const test = io.sockets.adapter.rooms;
-      // console.log(test)
-
-      // console.log(io.sockets.adapter.rooms.get(roomID))
-      console.log(io.sockets.adapter.rooms)
-
-
       const room = privateRooms.get(roomID);
       room.preGameTimer = PREGAME_TIMER;
       room.usersCompleted = [];
@@ -341,6 +345,8 @@ module.exports = (io) => {
           privateRoomTextMap.delete(roomID);
         }
       }
+
+      socket.leave(roomID)
     });
 
     socket.on("disconnect", (reason) => {

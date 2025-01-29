@@ -15,6 +15,7 @@ const PrivateLobbyChooser = () => {
   const roomID = useSelector((state) => state.multiplayer.roomID)
 
   const user = useSelector((state) => state.user.user)
+  const userStats = useSelector((state) => state.user.userStats)
 
   const guestWpm = useSelector((state) => state.guestUser.guestWpm)
 
@@ -36,7 +37,6 @@ const PrivateLobbyChooser = () => {
       dispatch(setRoomID(id))
 
       const username = user ? user.username : "Guest"
-      const averageWPM = user ? user.averageWPM : guestWpm // CHECK
       
       const userData = {
         username: username,
@@ -45,7 +45,7 @@ const PrivateLobbyChooser = () => {
         percentage: 0,
         id: "",
         roomOwner: false,
-        averageWpm: averageWPM,
+        ...userStats
       }
 
 

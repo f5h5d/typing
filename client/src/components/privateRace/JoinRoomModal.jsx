@@ -11,6 +11,7 @@ const JoinRoomModal = ({ }) => {
   const typingMode = useSelector((state) => state.typing.typingMode)
 
   const user = useSelector((state) => state.user.user)
+  const userStats = useSelector((state) => state.user.userStats)
   const [errMessage, setErrMessage] = useState("")
 
 
@@ -55,6 +56,7 @@ const JoinRoomModal = ({ }) => {
       percentage: 0,
       id: "",
       roomOwner: false,
+      ...userStats
     }
     socket.emit("join_room", [id, typingMode, userData])
   }

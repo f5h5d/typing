@@ -115,6 +115,7 @@ const TypingTracker = () => {
 
           if (totalTimeRef.current - Math.trunc((Date.now() - startTimeRef.current)/1000) == 0) { // the total time has elapsed for the timed trials
             dispatch(setEndTime(Date.now()))
+            console.log("finished time trial")
             dispatch(setFinishedTest(true));
           }
         }

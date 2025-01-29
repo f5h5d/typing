@@ -15,14 +15,6 @@ const Main = () => {
 
   const user = useSelector((state) => state.user.user)
 
-  useEffect(() => {
-    if (user) {
-      axios.get(`${API}/races/stats/${user.user_id}`).then((response) => {
-        console.log(response.data)
-      })
-    }
-  }, [])
-
 
 
   return (
