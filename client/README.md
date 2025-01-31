@@ -24,6 +24,7 @@ THINGS TO DO:
 - fix all bugs that are going to appear for private rooms (DONEEEEEEEEE)
 - fix bots for not signed in users (DONEEEEEEEEE)
 - when private room leader leaves, it should assign a new leader
+- some things in constant folder like API should probably be in .env
  
 
 

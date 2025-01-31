@@ -13,6 +13,7 @@ import { fetchUser, setUser, setUserStats } from './redux/userSlice'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
 import { API, GUEST_USER_DEFAULT_WPM } from './constants'
+import EmailVerified from './pages/EmailVerified'
 
 function App() {
   const [openSignUpModal, setOpenSignUpModal] = useState(false)
@@ -104,6 +105,7 @@ function App() {
         <Route path="/sandbox" element={<Sandbox />}></Route>
         <Route path="/multiplayer" element={<Multiplayer />}></Route>
         <Route path="/private-race" element={<PrivateRace />}></Route>
+        <Route path="/users/:id/verify/:token" element={<EmailVerified />}></Route>
       </Routes>
     </Container>
   </Router>

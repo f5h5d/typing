@@ -12,8 +12,10 @@ const PREGAME_TIMER = 3;
 const MAX_USERS_PER_GAME = 3;
 const USER_JOIN_TIMER_LIMIT = 1;
 const MAX_UPPER_LOWER_WPM_RANGE = 20;
-const BOT_WPM_INTERVAL = 10
-const BOT_NAME = "Bot"
+const BOT_WPM_INTERVAL = 10;
+const BOT_NAME = "Bot";
+
+const USER_DEFAULT_WPM = 40;
 
 const GAME_MODES = {
   SANDBOX: 0,
@@ -21,17 +23,16 @@ const GAME_MODES = {
   PRIVATE: 2,
 };
 
-
 const findWordFromCharacter = (index, text) => {
   const textArr = text.split(" ");
   let count = 0;
   for (let word of textArr) {
     count += word.length + 1; // plus one for space
     if (count > index) {
-      return word
+      return word;
     }
   }
-}
+};
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -73,8 +74,9 @@ module.exports = (io) => {
         for (let [key, value] of rooms) {
           if (
             value.preGameTimer > USER_JOIN_TIMER_LIMIT && // make sure the time is not too low
-            Math.abs(userData.averageWpm - value.roomAverageWpm) < MAX_UPPER_LOWER_WPM_RANGE && // make sure user is in the "skill" range for the lobby
-            Object.keys(value.usersData).length < MAX_USERS_PER_GAME // number of players less than the max 
+            Math.abs(userData.averageWpm - value.roomAverageWpm) <
+              MAX_UPPER_LOWER_WPM_RANGE && // make sure user is in the "skill" range for the lobby
+            Object.keys(value.usersData).length < MAX_USERS_PER_GAME // number of players less than the max
           ) {
             roomID = key;
           }
@@ -114,7 +116,9 @@ module.exports = (io) => {
       room.usersData["" + socket.id] = { ...userData, id: socket.id }; // update the data in the backend
       room.roomAverageWpm = Math.round(
         (room.roomAverageWpm * (Object.keys(room.usersData).length - 1) +
-          userData.averageWpm) /
+          (userData.averageWpm == null // this is needed because when user created their averageWPM at start is null
+            ? USER_DEFAULT_WPM
+            : userData.averageWpm)) /
           Object.keys(room.usersData).length
       );
       socket.to(roomID).emit("initialize_user_data_for_others", room.usersData); // give new user data of previous users
@@ -123,7 +127,10 @@ module.exports = (io) => {
 
       socket.emit("initialize_other_users_data", room.usersData);
 
-      if (mode !== GAME_MODES.PRIVATE && Object.keys(rooms.get(roomID).usersData).length == 1) {
+      if (
+        mode !== GAME_MODES.PRIVATE &&
+        Object.keys(rooms.get(roomID).usersData).length == 1
+      ) {
         // this user is first user in public lobby they in the room => must start it
         socket.emit("tell_user_to_start_game", roomID);
       }
@@ -133,9 +140,10 @@ module.exports = (io) => {
 
     socket.on("start_game", (mode, roomID) => {
       let totalBots = 0;
-      let room = (mode == GAME_MODES.MULTIPLAYER
-        ? rooms.get(roomID)
-        : privateRooms.get(roomID));
+      let room =
+        mode == GAME_MODES.MULTIPLAYER
+          ? rooms.get(roomID)
+          : privateRooms.get(roomID);
       io.to(roomID).emit("started_game");
 
       io.to(roomID).emit("pre_game_timer", room.preGameTimer); // tell all clients to set the pregame timer
@@ -164,9 +172,12 @@ module.exports = (io) => {
           room.preGameTimer == USER_JOIN_TIMER_LIMIT &&
           Object.keys(room.usersData).length < MAX_USERS_PER_GAME
         ) {
-          const numberOfBotsNeeded = mode == GAME_MODES.MULTIPLAYER ? MAX_USERS_PER_GAME - Object.keys(room.usersData).length : 0
-          totalBots = numberOfBotsNeeded
-          const wpmIntervals = [0, -10, 10]
+          const numberOfBotsNeeded =
+            mode == GAME_MODES.MULTIPLAYER
+              ? MAX_USERS_PER_GAME - Object.keys(room.usersData).length
+              : 0;
+          totalBots = numberOfBotsNeeded;
+          const wpmIntervals = [0, -10, 10];
           for (let i = 0; i < numberOfBotsNeeded; i++) {
             room.usersData["" + i] = {
               username: BOT_NAME,
@@ -183,7 +194,7 @@ module.exports = (io) => {
               lastTenRacesWpm: 0,
               lastTenRacesAccuracy: 0,
               guest: false,
-            }
+            };
           }
 
           socket.emit("initialize_other_users_data", room.usersData);
@@ -192,28 +203,28 @@ module.exports = (io) => {
         if (room.preGameTimer == -1) {
           clearInterval(preGameInterval);
 
-          if (mode == GAME_MODES.MULTIPLAYER) { // should not be bots in private lobby
-            simulateBots()
+          if (mode == GAME_MODES.MULTIPLAYER) {
+            // should not be bots in private lobby
+            simulateBots();
           }
         }
 
         io.to(roomID).emit("pre_game_timer", room.preGameTimer); // decrement the pregame timer for the clients
       }, 1000);
 
-
-
-      const simulateBots = () => { // doesnt work for guests yet
+      const simulateBots = () => {
+        // doesnt work for guests yet
         let botsCompleted = 0;
 
         let elapsedTime = 0;
         const simulateBotsInterval = setInterval(() => {
           for (let id in room.usersData) {
-            const user = room.usersData[id]
+            const user = room.usersData[id];
             if (user.username == BOT_NAME && user.percentage < 100) {
-
-              charactersWritten = Math.round((user.averageWpm * 5 * elapsedTime) / 60)
-              const text = roomsTextCache.get(roomID).words // CHANGE TO TEXT LATER (roomsTextCache.get(roomID).text)
-
+              charactersWritten = Math.round(
+                (user.averageWpm * 5 * elapsedTime) / 60
+              );
+              const text = roomsTextCache.get(roomID).words; // CHANGE TO TEXT LATER (roomsTextCache.get(roomID).text)
 
               // check if bot is finished, if it is not then does regular things
               if (charactersWritten >= text.length) {
@@ -222,72 +233,72 @@ module.exports = (io) => {
                 botsCompleted += 1;
 
                 if (botsCompleted >= totalBots) {
-                  io.to(roomID).emit("update_users_data", room.usersData); 
-                  clearInterval(simulateBotsInterval)
+                  io.to(roomID).emit("update_users_data", room.usersData);
+                  clearInterval(simulateBotsInterval);
                 }
-
               } else {
+                const currentWord = findWordFromCharacter(
+                  charactersWritten,
+                  text
+                );
+                const percentage = (charactersWritten / text.length) * 100;
 
-
-                const currentWord = findWordFromCharacter(charactersWritten, text)
-                const percentage = (charactersWritten / text.length) * 100
-  
                 user.currentWord = currentWord;
-                user.percentage = percentage
-  
-                user.wpm = Math.round((charactersWritten / 5) / (elapsedTime/60)); // change back later aka make it just equal to averageWPM this is just for testing
-                
+                user.percentage = percentage;
 
+                user.wpm = Math.round(
+                  charactersWritten / 5 / (elapsedTime / 60)
+                ); // change back later aka make it just equal to averageWPM this is just for testing
               }
-            
             }
           }
 
           elapsedTime += 1;
 
           io.to(roomID).emit("update_users_data", room.usersData); // decrement the pregame timer for the clients
-        }, 1000)
-
-
-      }
-    
+        }, 1000);
+      };
     });
 
     // update the data for all other clients
     socket.on("update_users_scores", (mode, roomID, data) => {
       let room =
-      mode == GAME_MODES.MULTIPLAYER
-        ? rooms.get(roomID)
-        : privateRooms.get(roomID);
+        mode == GAME_MODES.MULTIPLAYER
+          ? rooms.get(roomID)
+          : privateRooms.get(roomID);
 
       if (!room) return; // when user leaves the race at the wrong time this can cause an error so this is to stop that
 
-      room.usersData["" + data.id] = {...room.usersData["" + data.id], ...data}; // update the essential data
+      room.usersData["" + data.id] = {
+        ...room.usersData["" + data.id],
+        ...data,
+      }; // update the essential data
       socket.to(roomID).emit("update_users_data", room.usersData);
     });
 
     // when user finished test
     socket.on("user_finished_test", (mode, roomID, data) => {
       let room =
-      mode == GAME_MODES.MULTIPLAYER
-        ? rooms.get(roomID)
-        : privateRooms.get(roomID);
+        mode == GAME_MODES.MULTIPLAYER
+          ? rooms.get(roomID)
+          : privateRooms.get(roomID);
 
       if (!room) return; // sometimes when user reloads this runs so this is to counter that
-        
+
       room.usersCompleted.push(socket.id);
       socket.emit("user_finished_position", room.usersCompleted.length);
 
       if (room.usersCompleted.length == Object.keys(room.usersData).length) {
         // means all users finished
         room.usersCompleted = [];
-        if (mode == GAME_MODES.MULTIPLAYER) { // once all users are done then it deletes the room
-          rooms.delete(roomID)
+        if (mode == GAME_MODES.MULTIPLAYER) {
+          // once all users are done then it deletes the room
+          rooms.delete(roomID);
         }
       }
 
-      if (mode == GAME_MODES.MULTIPLAYER ) {
-        socket.leave(roomID)
+      if (mode == GAME_MODES.MULTIPLAYER) {
+        socket.leave(roomID);
       }
     });
 
@@ -319,7 +330,7 @@ module.exports = (io) => {
     });
 
     socket.on("pre_disconnect", ([mode, roomID]) => {
-      console.log("pre disconnecting")
+      console.log("pre disconnecting");
       if (mode === GAME_MODES.MULTIPLAYER) {
         const room = rooms.get(roomID);
         if (room === undefined) return;
@@ -346,7 +357,7 @@ module.exports = (io) => {
         }
       }
 
-      socket.leave(roomID)
+      socket.leave(roomID);
     });
 
     socket.on("disconnect", (reason) => {
