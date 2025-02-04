@@ -44,7 +44,7 @@ const TypingSection = ({ typingRef }) => {
   const typedAtAll = useSelector((state) => state.typing.typedAtAll)
   const startTime = useSelector((state) => state.typing.startTime)
   const wpm = useSelector((state) => state.typing.wpm)
-  const selectedType = useSelector((state) => state.typing.selectedType)
+  const typingType = useSelector((state) => state.typing.typingType)
   const selectedLength = useSelector((state) => state.typing.selectedLength)
   const mistakesList = useSelector((state) => state.typing.mistakesList)
 
@@ -130,7 +130,7 @@ const TypingSection = ({ typingRef }) => {
           </div>
           <textarea
             onBlur={(e) => e.target.focus()}
-            onChange={(e) => updateText(e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, selectedType, selectedLength, isMultiplayer, hasRaceStarted, mistakesList, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine, addToMistakesList)}
+            onChange={(e) => updateText(e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, typingType, selectedLength, isMultiplayer, hasRaceStarted, mistakesList, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine, addToMistakesList)}
             onKeyDown={(e) => checkBeforeKeyPress(e, incorrectText, typingText, wordsTyped, isMultiplayer, hasRaceStarted, typingRef, typingTextRef, cursorRef, dispatch, setUserTyped, setIncorrectText, setLastTyped, setRestart)}
             onMouseDown={(e) => e.preventDefault()}
             autoFocus

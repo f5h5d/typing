@@ -11,6 +11,9 @@ import JoinRoomModal from './JoinRoomModal'
 
 const PrivateLobbyChooser = () => {
   const dispatch = useDispatch()
+
+  const typingType = useSelector((state) => state.typing.typingType)
+
   const joiningRoom = useSelector((state) => state.private.joiningRoom)
   const roomID = useSelector((state) => state.multiplayer.roomID)
 
@@ -50,7 +53,7 @@ const PrivateLobbyChooser = () => {
 
 
 
-      socket.emit("join_room", [id, TYPING_MODE, userData])
+      socket.emit("join_room", [id, TYPING_MODE, userData, typingType])
     }
 
     socket.on("created_room", onCreatedRoom)

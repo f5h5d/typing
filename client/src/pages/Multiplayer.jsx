@@ -20,6 +20,7 @@ const Multiplayer = () => {
   const typingText = useSelector((state) => state.typing.typingText)
   const typingMode = useSelector((state) => state.typing.typingMode)
   const finishedTest = useSelector((state) => state.typing.finishedTest)
+  const typingType = useSelector((state) => state.typing.typingType);
 
   const roomID = useSelector((state) => state.multiplayer.roomID)
   const lookingForRoom = useSelector((state) => state.multiplayer.lookingForRoom)
@@ -73,7 +74,7 @@ const Multiplayer = () => {
     }
 
 
-    socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData])
+    socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData, typingType])
     lookingForRoomRef.current = false;
     return () => {
       socket.disconnect();
@@ -90,7 +91,7 @@ const Multiplayer = () => {
     }
 
     const tellUserToStartGame = (roomID) => {
-      socket.emit("start_game", GAME_MODES.MULTIPLAYER, roomID)
+      socket.emit("start_game", GAME_MODES.MULTIPLAYER, roomID, typingType)
     }
 
     socket.on("get_room_id", onGetRoomId)

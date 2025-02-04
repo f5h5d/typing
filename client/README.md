@@ -32,3 +32,4 @@ BUGS TO FIX:
 - Sometimes typing text is not same for all users (DONEEEEEEEEE)
   * sometimes it doesnt even appear (DONEEEEEEEEE)
 - Pressing next race for private race is completely bugged, and also it allows people that are not the leader to start new race...  (DONEEEEEEEEE)
+- After user verifies and then signs in there is an error (DONEEEEEEEEE)

@@ -1,8 +1,9 @@
 require('dotenv').config(); // for env file
 const express = require("express");
-const wordRoutes = require("./src/routes/words");
+const wordsRoutes = require("./src/routes/words");
 const authRoutes = require("./src/routes/auth");
 const raceRoutes = require("./src/routes/races");
+const quotesRoutes = require("./src/routes/quotes");
 const app = express();
 const cors = require("cors"); // for giving frontend permission
 const { client } = require("./src/config/database");
@@ -43,9 +44,10 @@ app.use(cookieParser());
 app.use(express.urlencoded({extended: false}))
 
 // Routes
-app.use("/words", wordRoutes);
+app.use("/words", wordsRoutes);
 app.use("/auth", authRoutes);
 app.use("/races", raceRoutes)
+app.use("/quotes", quotesRoutes)
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

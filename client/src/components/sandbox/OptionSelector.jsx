@@ -1,16 +1,18 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedLength, setSelectedType, setTypingText, reset,setTypingBackgroundInfo, setTotalTime, setSelectedDifficulty, setCurrentSelection, setRefillTypingText } from "../../redux/typingSlice";
+import { setSelectedLength, setTypingType, setTypingText, reset,setTypingBackgroundInfo, setTotalTime, setSelectedDifficulty, setCurrentSelection, setRefillTypingText } from "../../redux/typingSlice";
 import axios from "axios"
 
 import styled from "styled-components";
+
+import { API } from "../../constants"
 
 
 
 const OptionSelector = ({ typingRef }) => {
   const dispatch = useDispatch();
   const selectedLength = useSelector((state) => state.typing.selectedLength);
-  const selectedType = useSelector((state) => state.typing.selectedType);
+  const typingType = useSelector((state) => state.typing.typingType);
   const restart = useSelector((state) => state.typing.restart);
   const currentSelection = useSelector((state) => state.typing.currentSelection);
   const selectedDifficulty = useSelector((state) => state.typing.selectedDifficulty)
@@ -22,24 +24,23 @@ const OptionSelector = ({ typingRef }) => {
     let minLength;
     let maxLength
 
-    if (selectedType == 0) { // quotes
+    if (typingType == 0) { // quotes
       if (selectedLength == 0) { // short
         minLength = 50
-        maxLength = 100
+        maxLength = 199
       } else if (selectedLength == 1) { // medium
-        minLength = 101
-        maxLength = 150
+        minLength = 200
+        maxLength = 249
       } else if (selectedLength == 2) { // long
-        minLength = 151
-        maxLength = 200
+        minLength = 250
+        maxLength = 299
       } else { // extra long
-        minLength = 201
-        maxLength = 250
+        minLength = 300
+        maxLength = 1000
       }
 
-      const queryParams = {minLength, maxLength}
-      quoteGetter(queryParams)
-    } else if (selectedType == 1) {
+      quoteGetter(minLength, maxLength)
+    } else if (typingType == 1) {
 
       let words = 0;
       if (selectedLength == 0) {
@@ -59,21 +60,20 @@ const OptionSelector = ({ typingRef }) => {
       }
 
 
-      if (selectedType == 0 || selectedLength < 4) {
+      if (typingType == 0 || selectedLength < 4) {
         dispatch(setTotalTime(0)) // reset the totalTime value as it should only be not 0 when it is a timed trial
       }
       wordsGetter(selectedDifficulty, words)
     }
-  }, [selectedLength, selectedType, selectedDifficulty, restart, refillTypingText])
+  }, [selectedLength, typingType, selectedDifficulty, restart, refillTypingText])
 
-  const quoteGetter = async (queryParams) => {
-    await axios.get("https://api.quotable.io/random", { 
-      params: queryParams
-    }).then ((response) => {
+  const quoteGetter = async (minLength, maxLength) => {
+    await axios.get(`${API}/quotes/${minLength}/${maxLength}`).then ((response) => {
+      console.log(response)
       dispatch(setTypingBackgroundInfo(response.data))
       dispatch(reset())
       typingRef.current.value = ""
-      dispatch(setTypingText(response.data.content))
+      dispatch(setTypingText(response.data.quote))
     }
     )
   }
@@ -101,7 +101,7 @@ const OptionSelector = ({ typingRef }) => {
       return;
     } 
     if (currentSelection == 0) {
-      dispatch(setSelectedType(selection))
+      dispatch(setTypingType(selection))
     } else if (currentSelection == 1) {
       dispatch(setSelectedLength(selection))
     } else if (currentSelection == 2) {
@@ -109,7 +109,7 @@ const OptionSelector = ({ typingRef }) => {
     }
   // once current selection goes to 2 it should reset back to 0 and show but if option one is selected it should not show last section
   // since option 2 is value of 1 adding 1 to 2 would allow third section to show 
-    dispatch(setCurrentSelection((currentSelection + 1 ) % (2 + selectedType)))
+    dispatch(setCurrentSelection((currentSelection + 1 ) % (2 + typingType)))
   }
 
   let buttonsToLoad = []
@@ -118,9 +118,9 @@ const OptionSelector = ({ typingRef }) => {
     buttonsToLoad = ["Quote", "Words"]
   } 
   else if (currentSelection == 1) {
-    if (selectedType == 0) { // quotes
+    if (typingType == 0) { // quotes
       buttonsToLoad = ["short", "medium", "long", "extra long", "Back"]
-    } else if (selectedType == 1) {
+    } else if (typingType == 1) {
       buttonsToLoad = ["10 Words","25 Words", "50 Words", "100 Words", "30 Seconds", "1 Minute", "Back"]
     } 
   } 
@@ -133,7 +133,7 @@ const OptionSelector = ({ typingRef }) => {
       <OptionsDiv>
         {buttonsToLoad.map((element, index) => {
           const borderClass = (index == 0 ? "left-button" : index == buttonsToLoad.length-1 ? "right-button" : "")
-          const highlightedClass = ((index == selectedType && currentSelection == 0) || (index == selectedLength && currentSelection == 1) || (index == selectedDifficulty-1 && currentSelection == 2) ? "highlighted" : "")
+          const highlightedClass = ((index == typingType && currentSelection == 0) || (index == selectedLength && currentSelection == 1) || (index == selectedDifficulty-1 && currentSelection == 2) ? "highlighted" : "")
           const red = (currentSelection > 0 && index == buttonsToLoad.length-1) ? "red" : ""
           return <button key={index} className={`option-button ${borderClass} ${highlightedClass} ${red}`} onClick={(e) => onButtonClick(e, index)}>{element}</button>
         })}

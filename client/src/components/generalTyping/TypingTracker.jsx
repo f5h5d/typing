@@ -13,7 +13,7 @@ const TypingTracker = () => {
   const wpmRecord = useSelector((state) => state.typing.wpmRecord)
   const mistakes = useSelector((state) => state.typing.mistakes)
   const finishedTest = useSelector((state) => state.typing.finishedTest)
-  const selectedType = useSelector((state) => state.typing.selectedType)
+  const typingType = useSelector((state) => state.typing.typingType)
   const selectedLength = useSelector((state) => state.typing.selectedLength)
   const typedAtAll = useSelector((state) => state.typing.typedAtAll)
   const elapsedTime = useSelector((state) => state.typing.elapsedTime)
@@ -32,7 +32,7 @@ const TypingTracker = () => {
   const typingTextRef = useRef(typingText)
   const startTimeRef = useRef(startTime)
   const typedAtAllRef = useRef(typedAtAll);
-  const selectedTypeRef = useRef(selectedType)
+  const selectedTypeRef = useRef(typingType)
   const selectedLengthRef = useRef(selectedLength);
   const totalTimeRef = useRef(totalTime)
   const lastTypedRef = useRef(lastTyped);
@@ -70,8 +70,8 @@ const TypingTracker = () => {
   }, [typedAtAll])
 
   useEffect(() => {
-    selectedTypeRef.current = selectedType
-  }, [selectedType])
+    selectedTypeRef.current = typingType
+  }, [typingType])
 
   useEffect(() => {
     selectedLengthRef.current = selectedLength
@@ -138,7 +138,7 @@ const TypingTracker = () => {
   const accuracy = Math.round(typingText.length / (mistakes + typingText.length) * 100)
   let firstSection = ""
 
-  if (selectedType == 0) {
+  if (typingType == 0) {
     firstSection = `${Math.trunc(elapsedTime/1000)}s`
   } else if (selectedLength >= 4) {
     firstSection = `${totalTime - Math.trunc(elapsedTime/1000)}s`

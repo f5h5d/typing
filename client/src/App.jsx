@@ -52,23 +52,7 @@ function App() {
   useEffect(() => {
     if (user && userStats.guest) {
       axios.get(`${API}/races/stats/${user.id}`).then(response => {
-
-      const { averageWpm, averageAccuracy, totalRaces, highestWpm, totalRacesWon, mostRecentWpm, lastTenRacesWpm, lastTenRacesAccuracy } = response.data;
-      const userStatInfo = {
-        averageWpm,
-        averageAccuracy,
-        totalRaces,
-        highestWpm,
-        totalRacesWon,
-        mostRecentWpm,
-        lastTenRacesWpm,
-        lastTenRacesAccuracy,
-        guest: false,
-      }
-        dispatch(setUser({...user, ...response.data}))
-        dispatch(setUserStats({...userStatInfo}))
-
-        console.log(userStatInfo)
+        dispatch(setUserStats({...response.data}))
       }) 
 
 

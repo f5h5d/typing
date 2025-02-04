@@ -16,6 +16,7 @@ const PrivateLobby = () => {
   const roomOwner = useSelector((state) => state.private.roomOwner)
 
   const typingMode = useSelector((state) => state.typing.typingMode)
+  const typingType = useSelector((state) => state.typing.typingType)
 
   useEffect(() => {
 
@@ -61,7 +62,7 @@ const PrivateLobby = () => {
 
 
   const onStartClick = () => {
-    socket.emit("start_game", GAME_MODES.PRIVATE, roomID)
+    socket.emit("start_game", GAME_MODES.PRIVATE, roomID, typingType)
   }
 
   const onHomeClick = () => {

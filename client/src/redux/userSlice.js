@@ -45,6 +45,8 @@ const userSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action) => {
         // When the `fetchUser` thunk resolves successfully
         state.loading = false;       // Stop loading
+
+        console.log(action.payload);
         state.user = action.payload; // Update the user with fetched data
       })
       .addCase(fetchUser.rejected, (state, action) => {

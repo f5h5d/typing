@@ -6,17 +6,25 @@ const { sequelize } = require("../config/database");
 const { Sequelize } = require("sequelize");
 
 router.post("/track", async (req, res) => {
+
+  console.log("reafched here")
   try {
     const race = await Races.create({
       ...req.body,
     });
+
+    
     res.json("Worked");
   } catch (error) {
+    console.log(error)
     res.json({ err: "Something went wrong..." });
+
   }
 });
 
 router.get("/stats/:user_id", async (req, res) => {
+
+  console.log("ere")
   try {
     const { user_id } = req.params;
     const userStatsPromise = Races.findOne({
@@ -106,6 +114,7 @@ router.get("/stats/:user_id", async (req, res) => {
         totalRacesWon,
         lastTenRacesWpm,
         lastTenRacesAccuracy,
+        guest: false, // just extra
       };
 
       res.json(stats);

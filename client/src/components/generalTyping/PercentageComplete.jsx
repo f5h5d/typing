@@ -6,7 +6,7 @@ const PercentageComplete = () => {
   const wordsTyped = useSelector((state) => state.typing.wordsTyped);
   const typingText = useSelector((state) => state.typing.typingText);
   const wpm = useSelector((state) => state.typing.wpm);
-  const selectedType = useSelector((state) => state.typing.selectedType);
+  const typingType = useSelector((state) => state.typing.typingType);
   const selectedLength = useSelector((state) => state.typing.selectedLength);
   const totalTime = useSelector((state) => state.typing.totalTime)
   const elapsedTime = useSelector((state) => state.typing.elapsedTime)
@@ -16,7 +16,7 @@ const PercentageComplete = () => {
   const user = useSelector((state) => state.user.user)
 
   let percent = 0
-  if (selectedType == 0 || (selectedType == 1 && selectedLength < 4)) { // if percent should be based on words completed
+  if (typingType == 0 || (typingType == 1 && selectedLength < 4)) { // if percent should be based on words completed
     percent = (wordsTyped / typingText.split(" ").length) * 100;
   } else { // percent should be based on time
     percent = ((Math.trunc(elapsedTime/1000)) / totalTime) * 100

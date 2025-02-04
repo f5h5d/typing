@@ -9,6 +9,7 @@ import { faX } from '@fortawesome/free-solid-svg-icons'
 const JoinRoomModal = ({ }) => {
   const dispatch = useDispatch()
   const typingMode = useSelector((state) => state.typing.typingMode)
+  const typingType = useSelector((state) => state.typing.typingType)
 
   const user = useSelector((state) => state.user.user)
   const userStats = useSelector((state) => state.user.userStats)
@@ -58,7 +59,7 @@ const JoinRoomModal = ({ }) => {
       roomOwner: false,
       ...userStats
     }
-    socket.emit("join_room", [id, typingMode, userData])
+    socket.emit("join_room", [id, typingMode, userData, typingType])
   }
 
   const onCancel = () => {

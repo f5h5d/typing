@@ -72,7 +72,7 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
   useEffect(() => {
     const onInitializeTypingQuote = (data) => {
       dispatch(reset())
-      dispatch(setTypingText(data.words))
+      dispatch(setTypingText(data.typingText))
       dispatch(setTypingBackgroundInfo(data))
       typingRef.current.value = ""
     }

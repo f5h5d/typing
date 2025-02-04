@@ -3,7 +3,6 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   typingMode: 0, // 0 is sandbox, 1 is multiplayer, 2 is private game
   typingText: ``,
- // know same all a these do last with govern need hand play off it just any can do both a not up for general increase a not up for general increase how all person fact good day however should begin long mean about program then around make day when if like good must tell set mean child well interest much would while because seem will see fact word between general around a child keep under but after such real move just interest
   userTyped: "",
   typingBackgroundInfo: [],
   incorrectText: [0, 0],
@@ -12,7 +11,7 @@ const initialState = {
   mouseX: 0,
   wordsPerLine: [0], // each index represents a line, showing how many words in each => start at -1 because of just how it starts cba to fix it
   selectedLength: 0,
-  selectedType: 1,
+  typingType: 1, // this is for type as in either quotes or words
   selectedDifficulty: 1,
   currentSelection: 0, // 0 is type, 1 is length, 2 is difficulty
   wpm: 0,
@@ -31,7 +30,7 @@ const initialState = {
 
   reloadedPage: false,
 
-  mistakesList: [], 
+  mistakesList: [],
 };
 
 const typingSlice = createSlice({
@@ -68,8 +67,8 @@ const typingSlice = createSlice({
     setSelectedLength: (state, action) => {
       state.selectedLength = action.payload;
     },
-    setSelectedType: (state, action) => {
-      state.selectedType = action.payload;
+    setTypingType: (state, action) => {
+      state.typingType = action.payload;
     },
     setWpm: (state, action) => {
       state.wpm = action.payload;
@@ -125,7 +124,7 @@ const typingSlice = createSlice({
       state.mistakesList.push(action.payload);
     },
     reset: (state) => {
-      state.typingText = initialState.typingText
+      state.typingText = initialState.typingText;
       state.userTyped = initialState.userTyped;
       // state.mistakesList = initialState.mistakesList
       state.incorrectText = initialState.incorrectText;
@@ -170,9 +169,8 @@ const typingSlice = createSlice({
   },
 });
 
-
 export const {
-  setTypingMode, 
+  setTypingMode,
   setTypingText,
   setTypingBackgroundInfo,
   setUserTyped,
@@ -182,7 +180,7 @@ export const {
   setMouseX,
   setWordsPerLine,
   setSelectedLength,
-  setSelectedType,
+  setTypingType,
   setWpm,
   setStartTime,
   setFinishedTest,
@@ -191,7 +189,7 @@ export const {
   setMistakes,
   setWpmRecord,
   setRestart,
-  setTotalTime, 
+  setTotalTime,
   setElapsedTime,
   setSelectedDifficulty,
   setCurrentSelection,

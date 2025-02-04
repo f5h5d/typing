@@ -8,7 +8,7 @@ const privateRoomTextMap = new Map(); // will need to do constant searches for s
 
 let lastCreatedPublicRoom = {}; // used for adding users to room, should fill this before moving on
 
-const PREGAME_TIMER = 3;
+const PREGAME_TIMER = 10;
 const MAX_USERS_PER_GAME = 3;
 const USER_JOIN_TIMER_LIMIT = 1;
 const MAX_UPPER_LOWER_WPM_RANGE = 20;
@@ -22,6 +22,11 @@ const GAME_MODES = {
   MULTIPLAYER: 1,
   PRIVATE: 2,
 };
+
+const TYPING_TYPE = {
+  QUOTES: 0,
+  WORDS: 1
+}
 
 const findWordFromCharacter = (index, text) => {
   const textArr = text.split(" ");
@@ -57,7 +62,7 @@ module.exports = (io) => {
       socket.emit("created_room", room);
     });
 
-    socket.on("join_room", ([id, mode, userData]) => {
+    socket.on("join_room", ([id, mode, userData, typingType]) => {
       let roomID = id; // for public set id to 0 by default which = false for the case  where new room is created
       let room;
 
@@ -74,9 +79,9 @@ module.exports = (io) => {
         for (let [key, value] of rooms) {
           if (
             value.preGameTimer > USER_JOIN_TIMER_LIMIT && // make sure the time is not too low
-            Math.abs(userData.averageWpm - value.roomAverageWpm) <
-              MAX_UPPER_LOWER_WPM_RANGE && // make sure user is in the "skill" range for the lobby
-            Object.keys(value.usersData).length < MAX_USERS_PER_GAME // number of players less than the max
+            Math.abs(userData.averageWpm - value.roomAverageWpm) < MAX_UPPER_LOWER_WPM_RANGE && // make sure user is in the "skill" range for the lobby
+            Object.keys(value.usersData).length < MAX_USERS_PER_GAME && // number of players less than the max
+            typingType == value.typingType // same typing type (quotes or words)
           ) {
             roomID = key;
           }
@@ -101,6 +106,7 @@ module.exports = (io) => {
             preGameTimer: PREGAME_TIMER,
             id: roomID,
             roomAverageWpm: 0,
+            typingType: typingType
           }); // usersCompleted stores id/username of users that have finished in order
           io.to(roomID).emit("pre_game_timer", rooms.get(roomID).preGameTimer); // tell all clients to set the pregame timer
           socket.emit("user_must_start_game", roomID); // ADD LATER
@@ -138,7 +144,7 @@ module.exports = (io) => {
       socket.emit("pre_game_timer", room.preGameTimer); // give the user the current pre-game-timer
     });
 
-    socket.on("start_game", (mode, roomID) => {
+    socket.on("start_game", (mode, roomID, typingType) => {
       let totalBots = 0;
       let room =
         mode == GAME_MODES.MULTIPLAYER
@@ -150,19 +156,26 @@ module.exports = (io) => {
 
       const preGameInterval = setInterval(() => {
         // decrement the pregame timer for 10 seconds when lobby created
+
+        const url = typingType == TYPING_TYPE.QUOTES ? "http://localhost:5000/quotes/100/150" : "http://localhost:5000/words/1/10"
+
         // generate text
         if (room.preGameTimer == USER_JOIN_TIMER_LIMIT) {
-          axios.get("http://localhost:5000/words/1/10").then((response) => {
-            // response.data.words = "This is a test"; // for testing purposes
+          axios.get(url).then((response) => {
 
-            if (mode == 2) {
+            const typingData = {
+              typingText: typingType == TYPING_TYPE.QUOTES ? response.data.quote : response.data.words, // in database the typingText has a different column
+              author: response.data.author,
+            }
+
+            if (mode == GAME_MODES.PRIVATE) {
               // if private lobby
-              privateRoomTextMap.set(roomID, response.data);
+              privateRoomTextMap.set(roomID, typingData);
             } else {
               // is a public lobby
-              roomsTextCache.set(roomID, response.data);
+              roomsTextCache.set(roomID, typingData);
             }
-            io.to(roomID).emit("initialize_typing_quote", response.data); // send everyone in the room teh typing quote
+            io.to(roomID).emit("initialize_typing_quote", typingData); // send everyone in the room teh typing quote
           });
         }
 
@@ -224,7 +237,7 @@ module.exports = (io) => {
               charactersWritten = Math.round(
                 (user.averageWpm * 5 * elapsedTime) / 60
               );
-              const text = roomsTextCache.get(roomID).words; // CHANGE TO TEXT LATER (roomsTextCache.get(roomID).text)
+              const text = roomsTextCache.get(roomID).typingText; // CHANGE TO TEXT LATER (roomsTextCache.get(roomID).text)
 
               // check if bot is finished, if it is not then does regular things
               if (charactersWritten >= text.length) {

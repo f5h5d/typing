@@ -1,4 +1,4 @@
-export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, selectedType, selectedLength, isMultiplayer, hasRaceStarted, mistakesList, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine, addToMistakesList) => {
+export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incorrectText, mistakes, wpmRecord, typedAtAll, wpm, startTime, typingType, selectedLength, isMultiplayer, hasRaceStarted, mistakesList, setWordsTyped, setIncorrectText, setUserTyped, setStartTime, setFinishedTest, setEndTime, setMistakes, setWpmRecord, setTypedAtAll, setRefillTypingText, isNewLine, addToMistakesList) => {
   if (isMultiplayer && !hasRaceStarted) { // user should not be able to type pre game
     e.preventDefault();
     return;
@@ -16,7 +16,7 @@ export const updateText = (e, typingRef, typingText, dispatch, wordsTyped, incor
     dispatch(setStartTime(Date.now()))
   }
 
-  if (currentlyTyped.length / typingText.length > 0.8 && selectedType == 1 && selectedLength >= 4) { // if 80% done then refill text if timed 
+  if (currentlyTyped.length / typingText.length > 0.8 && typingType == 1 && selectedLength >= 4) { // if 80% done then refill text if timed 
     dispatch(setRefillTypingText(1))
   }
 

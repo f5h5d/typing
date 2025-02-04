@@ -8,7 +8,8 @@ import { Link } from "react-router-dom"
 import axios from 'axios';
 import { setLookingForRoom, setMode } from '../redux/multiplayerSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { API, GAME_MODES } from '../constants';
+import { API, GAME_MODES, TYPING_TYPE } from '../constants';
+import { setTypingType } from '../redux/typingSlice';
 const Main = () => {
   const dispatch = useDispatch()
 
@@ -33,19 +34,19 @@ const Main = () => {
           </Link>
         </Section>
         <Section>
-          <Link className="box" to="/multiplayer" onClick={() => { dispatch(setMode(GAME_MODES.SANDBOX)); dispatch(setLookingForRoom(true))}}>
+          <Link className="box" to="/multiplayer" onClick={() => { dispatch(setMode(GAME_MODES.MULTIPLAYER)); dispatch(setTypingType(TYPING_TYPE.QUOTES)); dispatch(setLookingForRoom(true))}}>
             <FontAwesomeIcon className="icon quote" icon={faQuoteLeft} />
             <div className="title">Multiplayer - Quotes</div>
           </Link>
         </Section>
         <Section>
-          <Link className="box" to="/multiplayer" onClick={() => dispatch(setMode(1))}>
+          <Link className="box" to="/multiplayer" onClick={() => { dispatch(setMode(GAME_MODES.MULTIPLAYER)); dispatch(setTypingType(TYPING_TYPE.WORDS));dispatch(setLookingForRoom(true))}}>
             <FontAwesomeIcon className="icon book" icon={faBook} />
             <div className="title">Multiplayer - Words</div>
           </Link>
         </Section>
         <Section>
-          <Link className="box" to="/private-race" onClick={() => dispatch(setMode(1))}>
+          <Link className="box" to="/private-race" onClick={() => {dispatch(setMode(GAME_MODES.MULTIPLAYER)); dispatch(setTypingType(TYPING_TYPE.WORDS))}}> {/* GET RID OF THIS AND FIX IT LATER */}
             <FontAwesomeIcon className="icon book" icon={faLock} />
             <div className="title">Private Lobby</div>
           </Link>

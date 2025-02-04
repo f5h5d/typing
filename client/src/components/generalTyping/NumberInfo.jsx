@@ -13,6 +13,7 @@ import { nextRaceMultiplayerReset, setHasRaceStarted } from '../../redux/multipl
 import { API, GAME_MODES } from '../../constants';
 import axios from 'axios';
 import { setGuestAccuracy, setGuestWpm, updateGuestRacesWon, updateGuestTotalRaces, setGuestHighestWpm, setGuestMostRecentWpm } from '../../redux/guestUserSlice';
+import { setUser, setUserStats } from '../../redux/userSlice';
   
 const NumberInfo = () => {
   
@@ -22,7 +23,7 @@ const NumberInfo = () => {
   const typingText = useSelector((state) => state.typing.typingText);
   const wpmRecord = useSelector((state) => state.typing.wpmRecord);
   const typingBackgroundInfo = useSelector((state) => state.typing.typingBackgroundInfo);
-  const selectedType = useSelector((state) => state.typing.selectedType)
+  const typingType = useSelector((state) => state.typing.typingType)
   const selectedLength = useSelector((state) => state.typing.selectedLength)
   const wordsTyped = useSelector((state) => state.typing.wordsTyped)
   const typingMode = useSelector((state) => state.typing.typingMode)
@@ -94,14 +95,22 @@ const NumberInfo = () => {
       won: racePlacement == 1,
       ranked: false,
     }
-
+    
     dispatch(setSavedData(true))
-    axios.post(`${API}/races/track`, info, { withCredentials: true }).then((response) => {
-    })
+
+    axios.post(`${API}/races/track`, info, { withCredentials: true }).then(() => {
+
+      axios.get(`${API}/races/stats/${user.id}`).then(response => {
+          dispatch(setUserStats({...response.data}))
+          dispatch(setSavedData(false));
+        }) 
+    });
+
+
   }, [racePlacement])
 
   let typedText = ""
-  if (selectedType == 0 || selectedLength < 4) typedText = typingBackgroundInfo.content; // if not timed trial then user has typed all the text
+  if (typingType == 0 || selectedLength < 4) typedText = typingBackgroundInfo.content; // if not timed trial then user has typed all the text
   else typedText = typingText.split(" ").slice(0,wordsTyped).join(" ")
 
 
@@ -129,12 +138,12 @@ const NumberInfo = () => {
         id: "",
         ...userStats
       }
-      socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData])
+      socket.emit("join_room", [0, GAME_MODES.MULTIPLAYER, userData, typingType]) // 0 here is just the default id
     }
 
     else if (typingMode == GAME_MODES.PRIVATE) { 
       socket.emit("reset_game_values", roomID)
-      socket.emit("start_game", GAME_MODES.PRIVATE, roomID)
+      socket.emit("start_game", GAME_MODES.PRIVATE, roomID, typingType)
     }
   }
 

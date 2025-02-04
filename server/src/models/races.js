@@ -28,6 +28,7 @@ const Races = sequelize.define('races', {
   },
   quote_id: {
     type: DataTypes.INTEGER,
+    
     references: {
       model: 'quotes',
       key: 'quotes_id',
