@@ -187,8 +187,10 @@ const MainTypingGame = ({ lookingForRoomRef }) => {
             <PreRaceTimer><div className="timer">{preRaceTimer}</div></PreRaceTimer>
           ) : ""}
           <PercentageCompleteSection>
-            <PercentageComplete />
-            <OtherPlayersPercentageComplete typingRef={typingRef}/>
+            <div className="percentages-container">
+              <PercentageComplete />
+              <OtherPlayersPercentageComplete typingRef={typingRef}/>
+            </div>
           </PercentageCompleteSection>
           <TypingContainer>
             <TypingTracker />
@@ -241,6 +243,13 @@ const Container = styled.div`
 
   overflow-y: auto;
   overflow-x: hidden;
+
+
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    .percentages-container {
+      width: 100vw !important;
+    }
+  }
 `;
 
 const PostTypingContainer = styled.div`
@@ -268,10 +277,25 @@ const Options = styled.div`
 `
 
 const PercentageCompleteSection = styled.div`
-  max-height: 240px;
   overflow-y: auto;
-  margin-top: 50px;
-  margin-bottom: 50px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: space-evenly;
+
+
+  .percentages-container {
+    display: flex;
+    flex-direction: column;
+    /* background: ${props => props.theme.colors.darkBackground}; */
+
+    height: 165px;
+
+    border-radius: 2px;
+    width: 65vw;
+  }
 `
 
 

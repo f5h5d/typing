@@ -150,47 +150,42 @@ const TypingSection = ({ typingRef }) => {
 export default TypingSection;
 
 const TypingText = styled.div`
-  max-width: 1000px;
+  width: 60vw;
   position: relative;
-  width: 50vw;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-  font-family: "JetBrains Mono", serif !important;
+  font-family: ${props => props.theme.fonts[1]};
 
   .typingArea {
-    width: 50vw;
+    width: 60vw;
     height: 50px;
-    background: ${({ theme: { colors } }) => colors.darkBackground};
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-    padding: 0 20px;
-    /* box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px; */
+    background: ${props => props.theme.colors.darkBackground};
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    padding: 0 25px;
     display: flex;
     align-items: center;
-    max-width: 1000px;
     .fake-input {
       width: 100%;
-      height: 65%;
+      height: 70%;
       border-radius: 10px;
-      font-size: 15px;
-      background: ${({ theme: { colors } }) => colors.mediumBackground};
-      color: white;
+      background: ${props => props.theme.colors.mediumBackground};
       padding-left: 10px;
-      
+      color: ${props => props.theme.colors.text};
+      font-size: ${props => props.theme.fontSizes.text};
       display: flex;
       align-items: center;
       cursor:text;
-      max-width: 1000px;
     }
 
     .fake-cursor {
     display: inline-block;
     height: 20px !important;
     width: 2px !important;
-    background: ${({ theme: { colors } }) => colors.blue};
+    background: ${props => props.theme.colors.accent};
     border-radius: 4px;
     animation: blink 2s infinite;
   }
@@ -202,12 +197,10 @@ const TypingText = styled.div`
     flex-wrap: wrap;
     overflow: hidden;
     height: 180px;
-    width: 50vw;
-    max-width: 1000px;
+    width: 60vw;
     padding: 10px 20px;
-    background: ${({ theme: { colors } }) => colors.mediumBackground};
+    background: ${props => props.theme.colors.mediumBackground};
     letter-spacing: 0px;
-    /* box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px; */
   }
 
   .typingTextContainer::after {
@@ -221,9 +214,10 @@ const TypingText = styled.div`
 }
 
   div {
-    color: ${({ theme: { colors } }) => colors.textDark};
+    color: ${props => props.theme.colors.textDark};
     line-height: 40px;
-    font-size: 23px;
+    font-size: ${props => props.theme.fontSizes.typingText};
+
     cursor: default;
     position: relative;
   }
@@ -246,12 +240,12 @@ const TypingText = styled.div`
   }
 
   .finished {
-    color: ${({ theme: { colors } }) => colors.text};
+    color: ${props => props.theme.colors.text};;
   }
 
   .incorrect {
-    background: ${({ theme: { colors } }) => colors.red};
-    color: ${({ theme: { colors } }) => colors.text};
+    background: ${props => props.theme.colors.red};
+    color: ${props => props.theme.colors.text};
   }
 
   .cursor {
@@ -259,7 +253,7 @@ const TypingText = styled.div`
     display: inline-block;
     height: 40px !important;
     width: 3px !important;
-    background: ${({ theme: { colors } }) => colors.blue};
+    background: ${props => props.theme.colors.accent};
     border-radius: 4px;
     animation: blink 2s infinite;
   }
@@ -290,15 +284,24 @@ const TypingText = styled.div`
   }
 
 
-  @media (max-width: 1050px) {
-    div {
-      font-size: 20px
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+
+    .typingTextContainer {
+      width: 70vw;
+    }
+    .typingArea {
+      width: 70vw;
     }
   }
 
-  @media (max-width: 550px) {
-    div {
-      font-size: 17px
-    }
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+
+  .typingTextContainer {
+    width: 80vw;
   }
+
+  .typingArea {
+    width: 80vw;
+  }
+}
 `;

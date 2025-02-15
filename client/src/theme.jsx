@@ -64,7 +64,7 @@ const darkTheme = {
   },
   fonts: ["Rubik", "JetBrains Mono"],
   fontSizes: {
-    typingText: "1rem",
+    typingText: "1.1rem",
     label: "1rem",
     largeLabel: "2rem",
     logo: {

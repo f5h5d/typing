@@ -164,9 +164,8 @@ const Container = styled.div`
   justify-content: center;
 
   .tracking-container {
-    width: 50vw;
+    width: 60vw;
     height: 25px;
-    max-width: 1000px;
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -189,4 +188,16 @@ const Container = styled.div`
       border-right: 2px solid ${props => props.theme.colors.darkBackground};
     }
   }
+
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    .tracking-container {
+      width: 70vw;
+    }
+  }
+
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    .tracking-container {
+      width: 80vw;
+  }
+}
 `

@@ -43,16 +43,17 @@ const PercentageComplete = () => {
 
 
 const PercentageCompleteContainer = styled.div`
-  width: 100vw;
+  width: 100%;
   display: flex;
   justify-content: center;
 
 `
 
 const Percentage = styled.div`
-  width: 50vw;
-  max-width: 1000px;
+  width: 60vw;
   padding: 5px 10px;
+
+  margin: 10px 0px;
 
   background: ${props => props.theme.colors.lightBackground};
   border-radius: 10px;
@@ -113,6 +114,7 @@ const Percentage = styled.div`
   }
 
   @media (max-width: ${props => props.theme.breakpoints.sm}) {
+    width: 80%;
     justify-content: space-between;
 
     .wpm {
