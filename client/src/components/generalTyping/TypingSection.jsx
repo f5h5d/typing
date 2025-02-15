@@ -204,8 +204,6 @@ const TypingText = styled.div`
     height: 180px;
     width: 50vw;
     max-width: 1000px;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
     padding: 10px 20px;
     background: ${({ theme: { colors } }) => colors.mediumBackground};
     letter-spacing: 0px;

@@ -211,7 +211,7 @@ const PreRaceTimer = styled.div`
   position: absolute;
   height: 100vh;
   width: 100vw;
-  background: ${({ theme: { colors } }) => colors.darkBackground};
+  background: ${props => props.theme.colors.darkBackground};
   z-index: 10000;
 
   display: flex;
@@ -220,8 +220,8 @@ const PreRaceTimer = styled.div`
   .timer {
     width: 100px;
     height: 100px;
-    background: ${({ theme: { colors } }) => colors.background};
-    color: ${({ theme: { colors } }) => colors.blue}; 
+    background: ${props => props.theme.colors.mainBackground};
+    color: ${props => props.theme.colors.accent};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -253,6 +253,7 @@ const PostTypingContainer = styled.div`
 
 const TypingContainer = styled.div`
   width: 100vw;
+  margin-top: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -261,6 +262,8 @@ const TypingContainer = styled.div`
 `
 
 const Options = styled.div`
+
+  margin-top: 100px;
   height: 20vh;
 `
 

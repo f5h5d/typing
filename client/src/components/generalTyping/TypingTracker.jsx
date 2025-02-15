@@ -147,9 +147,11 @@ const TypingTracker = () => {
   }
   return (
     <Container>
-      <div className="first-section">{firstSection}</div>
-      <div className="wpm">{wpm} WPM</div>
-      <div className="acc">{accuracy}%</div>
+      <div className="tracking-container">
+        <div className="first-section">{firstSection}</div>
+        <div className="wpm">{wpm}wpm</div>
+        <div className="acc">{accuracy}%</div>
+      </div>
       </Container>
   )
 }
@@ -157,43 +159,34 @@ const TypingTracker = () => {
 export default TypingTracker
 
 const Container = styled.div`
+  width: 100vw;
   display: flex;
-  justify-content: space-between;
-  width: 50%;
-  /* background: black; */
-  margin-bottom: 5px;
-  padding: 0 20px;
-  text-align: center;
-  max-width: 1000px;
+  justify-content: center;
 
+  .tracking-container {
+    width: 50vw;
+    height: 25px;
+    max-width: 1000px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    background: ${props => props.theme.colors.lightBackground};
 
-  div {
-    width: 110px;
-    background: ${({ theme: { colors } }) => colors.lightBackground};
-    padding: 5px 10px;
-    border-radius: 10px;
-    
-  }
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
 
-
-  @media (max-width: 1050px) {
     div {
-      padding: 5px 5px;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: ${props => props.theme.fontSizes.text};
     }
 
-    .acc {
-      display: none;
-    }
-  }
-
-  @media (max-width: 550px) {
-    justify-content: center;
-    div {
-      padding: 5px 5px;
-    }
-
-    .first-section {
-      display: none;
+    div:nth-child(1), div:nth-child(2) {
+      border-right: 2px solid ${props => props.theme.colors.darkBackground};
     }
   }
 `
