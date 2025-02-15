@@ -157,13 +157,6 @@ const OptionsContainer = styled.div`
 `;
 
 const OptionsDiv = styled.div`
-  /* background: #161616;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  padding: 20px 20px;
-  border-radius: 10px; */
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
   height: 30px;
 
@@ -202,12 +195,6 @@ const OptionsDiv = styled.div`
   }
 
 `
-const Line = styled.div`
-  /* height: 2px;
-  width: 20vw; */
-
-
-`
 
 const Options = styled.div`
   display: flex;
@@ -237,11 +224,3 @@ const Options = styled.div`
     opacity:1;
   }
 `;
-
-
-const BigOptions = styled(Options)`
-    .option {
-    padding: 10px 20px;
-    margin: 5px;
-  }
-`

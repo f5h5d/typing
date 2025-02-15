@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import CountUp from 'react-countup';
 import { Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, ComposedChart, Label} from 'recharts';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrophy } from '@fortawesome/free-solid-svg-icons';
+import { faCrown } from '@fortawesome/free-solid-svg-icons';
 import { nextRacePrivateReset, setStartPrivateGame } from '../../redux/privateSlice';
 import { reset, setSavedData } from '../../redux/typingSlice';
 import { socket } from '../../Socket';
@@ -14,8 +14,11 @@ import { API, GAME_MODES } from '../../constants';
 import axios from 'axios';
 import { setGuestAccuracy, setGuestWpm, updateGuestRacesWon, updateGuestTotalRaces, setGuestHighestWpm, setGuestMostRecentWpm } from '../../redux/guestUserSlice';
 import { setUser, setUserStats } from '../../redux/userSlice';
+import CornerButton from '../styles/CornerButton';
   
 const NumberInfo = () => {
+
+  const [currentOption, setCurrentOption] = useState(0) // 0 == graph / 1 == text
   
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -155,7 +158,7 @@ const NumberInfo = () => {
             const unit = prompt == "Accuracy" ? "%" : prompt == "Time" ? "s" : ""
             return (
             <div key={index} className={`prompt-container prompt-container-${index}`}>
-              {racePlacement == 1 && prompt == "WPM" ? <FontAwesomeIcon icon={faTrophy} className="trophy" /> : ""}
+              {racePlacement == 1 && prompt == "WPM" ? <FontAwesomeIcon icon={faCrown} className="crown" /> : ""}
               <div className="prompt">{prompt}</div>
               <div>
                 <CountUp className="value" end={values[index]} duration={1} decimals={index == 2 ? 2 : 0}></CountUp> {/* for decimals only show decimals on second index (the time) */}
@@ -165,7 +168,12 @@ const NumberInfo = () => {
           )})}
         </NumberInfoContainer>
         <RightSideContainer>
+          <SwitchButtons>
+            <button className={`option-button left-button ${currentOption == 0 ? "highlighted" : ""}`} onClick={() => setCurrentOption(0)}>Graph</button>
+            <button className={`option-button right-button ${currentOption == 1 ? "highlighted" : ""}`} onClick={() => setCurrentOption(1)}>Text</button>
+          </SwitchButtons>
           <div className="graph-container">
+          {currentOption == 0 ? (
             <div className="graph-inner-container">
               <ResponsiveContainer>
                 <ComposedChart data={wpmRecord}>
@@ -198,30 +206,92 @@ const NumberInfo = () => {
                     <Line dot={false} yAxisId="right" dataKey="mistakes" fill="transparent" stroke="#FF4D4D" />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="text-container">
-            {/* <Scrollbar style={{ width: '100%', height: '300px' }}> */}
+              </div>
+            ) : (
+            <div className="text-container">
               <div className="text">{typedText}</div>
-            {/* </Scrollbar> */}
-            <div className="other-info">
-              <div className="author">-{typingBackgroundInfo.author}</div>
+              <div className="other-info">
+                <div className="author">-{typingBackgroundInfo.author}</div>
+              </div>
             </div>
+            )}
           </div>
         </RightSideContainer >
       </MainContent>
       <Buttons>
-        <button onClick={onHomeClick} className="button">Home</button>
-        { typingMode == GAME_MODES.PRIVATE && roomOwner ? <button className="button" onClick={onBackToLobby}>Back To Lobby</button> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
-        { typingMode != GAME_MODES.PRIVATE || (typingMode == GAME_MODES.PRIVATE && roomOwner) ? <button className="button next-race" onClick={onNextRace}>Next Race</button> : ""} {/* people in private lobby should not be able to start game, only lobby owner*/}
+        <CornerButton onClick={onHomeClick}><button className="corner-button"><span>Home</span></button></CornerButton>
+        { typingMode == GAME_MODES.PRIVATE && roomOwner ?       <CornerButton onClick={onBackToLobby}><button className="corner-button"><span>Back To Lobby</span></button></CornerButton> : ""} { /* only allow to go back to lobby if it is private game and user is the owner */}
+        { typingMode != GAME_MODES.PRIVATE || (typingMode == GAME_MODES.PRIVATE && roomOwner) ? <CornerButton onClick={onNextRace}><button className="corner-button "><span>Next Race</span></button></CornerButton>: ""} {/* people in private lobby should not be able to start game, only lobby owner*/}
       </Buttons>
     </Container>
   )
 }
 
 
-const Buttons = styled.div`
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
+  transform: scale(0.85);
+
+  @media (max-width: ${props => props.theme.breakpoints.lg}) {
+    transform: scale(0.9)
+  }
+`
+
+const BottomRow = styled.div`
+  height: 25%;
+
+`
+
+const SwitchButtons = styled.div`
+  position: absolute;
+  right: 30px;
+  top: 20px;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  height: 30px;
+
+  .option-button {
+    border: 1px solid ${({ theme: { colors } }) => colors.accent};
+    background: ${({ theme: { colors } }) => colors.accent};
+    opacity: 0.5;
+    width: 100px;
+    height: 30px;
+    color: white;
+    transition: 0.1s linear;
+    cursor: pointer;
+    /* border: 1px solid black; */
+  }
+
+  .right-button {
+    /* border-left: none; */
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  .left-button {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+  .highlighted {
+    opacity: 1
+  }
+
+  .red {
+    background: ${({ theme: { colors } }) => colors.red};
+    opacity: 1;
+    border: 1px solid ${({ theme: { colors } }) => colors.red};
+
+  }
+
+`
+
+
+const Buttons = styled.div`
+  margin-top: 50px;
   top: 30px;
   width: 90vw;
   height: 50px;
@@ -231,27 +301,6 @@ const Buttons = styled.div`
   justify-content: space-between;
 
   align-items: center;
-
-  .button {
-    position: relative !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 150px;
-    margin: 0 20px;
-    height: 25px;
-    padding: 15px 20px;
-    border-radius: 10px;
-    text-decoration: none;
-    background: ${({ theme: { colors } }) => colors.blue};
-    color: ${({ theme: { colors } }) => colors.white};
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
-    cursor: pointer;
-  }
-
-  .home {
-
-  }
 `
 
 
@@ -259,28 +308,16 @@ const MainContent = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: center;
+  /* align-items: center; */
   width: 100vw;
 
-  @media (max-width: 850px) {
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
     flex-direction: column;
-  }
-`
-const Container = styled.div`
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  transform: scale(0.85);
-
-  @media (max-width: 1550px) {
-    transform: scale(0.9)
   }
 `
 
 const RightSideContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -288,21 +325,22 @@ const RightSideContainer = styled.div`
   width: 80vw;
   height: 70vh;
 
-  margin-left: 7px;
+  /* margin-left: 7px; */
 
   .graph-container, .text-container {
-    background: black;
-    height: calc(48% + 6px);
+    /* height: calc(48% + 6px); */
     width: 100%;
-    background: ${({ theme: { colors } }) => colors.lightBackground};
-    border: 1px solid ${({ theme: { colors } }) => colors.black};
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    background: ${props => props.theme.colors.lightBackground};
+
   }
 
   .graph-container {
+    border: 1px solid ${props => props.theme.colors.darkBackground};
+    height: 100%;
     border-bottom: none;
-    margin-bottom: 5px;
     width: 100%;
+
+    border-bottom: none;
 
     display: flex;
     align-items: center;
@@ -316,14 +354,11 @@ const RightSideContainer = styled.div`
 
     width: 95%;
     height: 80%;
-
-    /* background: black; */
     padding-top: 20px;
   }
-
-
-
   .text-container {
+    height: 100%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -332,15 +367,14 @@ const RightSideContainer = styled.div`
   .text {
     width: 85%;
     height: 50%;
-    background: ${({ theme: { colors } }) => colors.mediumBackground};
+    background: ${props => props.theme.colors.mediumBackground};
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     margin-top: 10px;
     padding: 10px 20px;
-    font-size: 20px;
+    font-size: ${props => props.theme.fontSizes.text};
     overflow-y: auto;
 
-    scrollbar-color: red orange;
   }
 
   .other-info {
@@ -348,7 +382,7 @@ const RightSideContainer = styled.div`
     align-items: center;
     width: 85%;
     height: 10%;
-    background: ${({ theme: { colors } }) => colors.mediumBackground};
+    background: ${props => props.theme.colors.mediumBackground};
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     padding: 10px 20px;
@@ -357,11 +391,11 @@ const RightSideContainer = styled.div`
   }
 
 
-  @media (max-width: 1250px) {
+  @media (max-width: ${props => props.theme.breakpoints.lg}) {
     width: 75vw;
   }
 
-  @media (max-width: 850px) {
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
     margin-left: 0px;
     width: 100vw;
     margin-top: 15px;
@@ -387,11 +421,12 @@ const NumberInfoContainer = styled.div`
     align-items: center;
     flex-direction: column;
     width: 100%;
-    height: 24%;
-    background: ${({ theme: { colors } }) => colors.lightBackground};
-    border: 1px solid ${({ theme: { colors } }) => colors.black};
-    margin: 2.5px 0px;
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    height: calc(25%);
+    background: ${props => props.theme.colors.lightBackground};
+    border: 1px solid ${props => props.theme.colors.darkBackground};
+    border-right: none;
+    /* margin: 2.5px 0px; */
+    /* box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px; */
     position: relative !important;
   }
 
@@ -405,41 +440,30 @@ const NumberInfoContainer = styled.div`
   }
 
   .prompt {
-    color: ${({ theme: { colors } }) => colors.blue};
-    font-size: 25px;
+    color: ${props => props.theme.colors.accent};
+    font-size: ${props => props.theme.fontSizes.label};
   }
 
   .value {
-    font-size: 50px;
+    font-size: ${props => props.theme.fontSizes.largeLabel} !important;
   }
 
 
-  .trophy {
+  .crown {
     position: absolute;
     font-size: 35px;
     top: -10px;
     right: -10px;
-    color: ${({ theme: { colors } }) => colors.trophy};
-    transform: rotate(25deg);
+    color: ${({ theme: { colors } }) => colors.special};
     padding: 10px;
-    background: ${({ theme: { colors } }) => colors.trophyBackground};
     border-radius: 50%;
   }
 
-  @media (max-width: 1550px) {
-    .prompt {
-      font-size: 20px;
-    }
-    .value {
-      font-size: 40px;
-    }
-  }
-
-  @media (max-width: 1250px) {
+  @media (max-width: ${props => props.theme.breakpoints.lg}) {
     width: 15vw;
   }
 
-  @media (max-width: 850px) {
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
     flex-direction: row !important;
     justify-content: center;
     width: 100vw;
@@ -449,7 +473,7 @@ const NumberInfoContainer = styled.div`
       width: 40%;
       height: 50%;
       margin: 2.5px;
-      border: 1px solid ${({ theme: { colors } }) => colors.black};
+      border: 1px solid ${({ theme: { colors } }) => colors.darkBackground};
     }
   }
 `

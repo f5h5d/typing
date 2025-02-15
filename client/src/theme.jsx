@@ -59,8 +59,8 @@ const darkTheme = {
     accent: "#007BFF",
     textDark: "#36424f",
     text: '#ffffff',
-    red: "#FF4D4D",
-    win: "#FFD700",
+    red: "#930707",
+    special: "#FFD700",
   },
   fonts: ["Rubik", "JetBrains Mono"],
   fontSizes: {
