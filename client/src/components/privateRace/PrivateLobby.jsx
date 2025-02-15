@@ -89,12 +89,12 @@ const PrivateLobby = () => {
   return (
     <Container>
 
-      <CodeContainer>
+      <CodeContainer className="code-container">
         <h1 className="label">ROOM CODE</h1>
         <h1 className="code">610205</h1>
       </CodeContainer>
 
-      <UsersTable>
+      <UsersTable className="users-table">
         <div className="table">
           <div className="table-header">
             <div className="table-header-content">
@@ -151,14 +151,38 @@ const PrivateLobby = () => {
 export default PrivateLobby
 
 const Container = styled.div`
-  position: absolute;
-  /* height: 100vh; */
   width: 100vw;
-  z-index: 10000;
+
+
+
+  @media (max-width: ${props => props.theme.breakpoints.sm}) {
+    .users-table > .table {
+      width: 400px;
+      font-size: ${props => props.theme.fontSizes.text};
+    }
+  }
+
+  @media (max-width: ${props => props.theme.breakpoints.xs}) {
+
+
+    .code-container > .code {
+      font-size: ${props => props.theme.fontSizes.mainText.sm}
+    }
+
+    .code-container > .label {
+      font-size: ${props => props.theme.fontSizes.label}
+    }
+
+    .users-table > .table {
+      width: 320px;
+    }
+  }
+
 `
 
 const Options = styled.div`
   margin-top: 50px;
+  margin-bottom: 50px;
 
 `
 
@@ -180,6 +204,7 @@ const UsersTable = styled.div`
 
   .table {
     width: 655px;
+    font-size: ${props => props.theme.fontSizes.label};
   }
 
   .table-header {
@@ -191,7 +216,6 @@ const UsersTable = styled.div`
       margin-left: 2.5%;
 
 
-      font-size: ${props => props.theme.fontSizes.label};
       display: flex;
       align-items: center;
       height: 100%;
@@ -207,11 +231,11 @@ const UsersTable = styled.div`
       }
 
       .speed {
-        width: 30%;
+        width: 25%;
       }
 
       .acc {
-        width: 10%;
+        width: 15%;
       }
     }
 
@@ -234,7 +258,6 @@ const UsersTable = styled.div`
       height: 43px;
       display: flex;
       align-items: center;
-      font-size: ${props => props.theme.fontSizes.label};
       background: ${props => props.theme.colors.darkBackground};
       border-radius: 10px;
 
@@ -249,10 +272,10 @@ const UsersTable = styled.div`
         width: 45%;
       }
       .data-point-speed {
-        width: 30%;
+        width: 25%;
       }
       .data-point-acc {
-        width: 10%;
+        width: 15%;
       }
     }
 
@@ -289,54 +312,3 @@ const CodeContainer = styled.div`
   }
 `
 
-// const ButtonContainer = styled.div`
-//   width: 80%;
-//   display: flex;
-//   justify-content: space-between;
-//   margin-top: 20px;
-
-//   button {
-//     width: 100px;
-//     height: 30px;
-//     color: white;
-//     background: ${({ theme: { colors } }) => colors.blue};
-//     border-radius: 10px;
-//     margin: 0 20px;
-//     cursor: pointer;
-//   }
-
-// `
-
-// const Players = styled.div`
-//   width: 80%;
-
-//   background: ${({ theme: { colors } }) => colors.background};
-//   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-//   display: flex;
-//   justify-content: top;
-//   align-items: center;
-//   flex-direction: column;
-
-//   border-radius: 10px;
-// `
-
-// const Player = styled.div`
-//   width: 80%;
-//   height: 50px;
-//   margin: 10px 0px;
-
-//   border-radius: 10px;
-//   background: ${({ theme: { colors } }) => colors.lightBackground};
-
-//   display: flex;
-//   align-items: center;
-
-
-
-//   p {
-//     margin-left: 20px;
-//     background: ${({ theme: { colors } }) => colors.background};
-//     padding: 5px;
-//     border-radius: 10px;
-//   }
-// `

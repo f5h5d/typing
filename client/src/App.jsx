@@ -92,10 +92,12 @@ function App() {
 }
 
 const Container = styled.div`
-  height: 100vh;
   width: 100vw;
+  min-height: 100vh;
+
+
   background: ${props => props.theme.colors.mainBackground};
-  overflow-y: hidden !important;
+
   overflow-x: hidden !important; 
   color: ${props => props.theme.colors.text};
   font-size: ${props => props.theme.fontSizes.text};

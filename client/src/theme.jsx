@@ -76,6 +76,9 @@ const darkTheme = {
     mainText: {
       default: "5rem",
       md: "4rem",
+      sm: "2.5rem",
+      xs: "2rem"
+
     },
   },
   breakpoints: {

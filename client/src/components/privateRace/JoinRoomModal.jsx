@@ -67,7 +67,7 @@ const JoinRoomModal = ({ }) => {
   }
   return (
     <Container>
-      <JoinBox>
+      <JoinBox className="join-box">
         <FontAwesomeIcon icon={faX} className="close-box" onClick={onCancel}/>
         <h1>Join Room</h1>
         <input onChange={(e) => onRoomIDChange(e)}/>

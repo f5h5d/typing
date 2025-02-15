@@ -189,4 +189,20 @@ const Container = styled.div`
     }
   }
 
+
+  @media (max-width: ${props => props.theme.breakpoints.xs}) {
+    .modal {
+      width: 300px !important;
+
+      .title {
+      font-size: ${props => props.theme.fontSizes.label};
+      }
+
+      .input {
+        height: 45px;
+        font-size: ${props => props.theme.fontSizes.label};
+      }
+    }
+  }
+
 `

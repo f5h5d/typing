@@ -140,7 +140,6 @@ const Main = () => {
 };
 
 const Container = styled.div`
-  height: 100vh;
   /* width: 100vw; */
   display: flex;
   flex-direction: column;
@@ -150,7 +149,7 @@ const Container = styled.div`
   @media (max-width: ${props => props.theme.breakpoints.lg}) {
 
     .main-text {
-      font-size: 4rem !important;
+      font-size: ${props => props.theme.fontSizes.mainText.md} !important;
     }
 
     .buttons {
@@ -173,7 +172,7 @@ const Container = styled.div`
   @media (max-width: ${props => props.theme.breakpoints.sm}) {
 
     .main-text {
-      font-size: 2.5rem !important;
+      font-size: ${props => props.theme.fontSizes.mainText.sm} !important;
     }
 
 
@@ -191,7 +190,7 @@ const Container = styled.div`
   @media (max-width: ${props => props.theme.breakpoints.xs}) {
 
     .main-text {
-      font-size: 2rem !important;
+      font-size: ${props => props.theme.fontSizes.mainText.xs} !important;
     }
 
     .invisible-when-small {
@@ -207,6 +206,7 @@ const Container = styled.div`
 
 const Leaderboard = styled.div`
   margin-top: 50px;
+  margin-bottom: 50px;
   .leaderboard-header {
     display: flex;
     align-items: center;

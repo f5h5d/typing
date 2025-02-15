@@ -358,7 +358,7 @@ const Container = styled.div`
       align-items: center;
       background: ${(props) => props.theme.colors.lightBackground};
       border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
+      border-top-left-radius: 10px;
       transition: max-height 0.4s ease-in-out;
     }
 
@@ -371,18 +371,17 @@ const Container = styled.div`
         rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
       transition: height 0.4s ease-in-out;
       background: ${(props) => props.theme.colors.lightBackground};
-      height: 38px;
+      width: 50px;
       /* height: inherit; */
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
       justify-content: space-evenly;
       position: absolute;
-      right: 45px;
-      border-top-left-radius: 10px;
       border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
 
-      width: 300px;
+      height: 300px;
       /* height: 120px !important; */
 
       .icon {
@@ -421,19 +420,28 @@ const Container = styled.div`
       }
     }
     .navbar {
-      position: relative;
-      top: 50px;
-      /* display: none; */
+      display: none;
     }
 
-    /* .navbar-small {
+    .navbar-small {
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
+      width: 50%;
+
+      .invisible-until-small {
+        display: block;
+      }
 
       .hamburger-icons {
-        right: 160px;
+        top: 35px;
       }
-    } */
+    }
+
+    .user {
+      display: none;
+    }
+
+
   }
 
   @media (max-width: ${(props) => props.theme.breakpoints.xs}) {
@@ -444,8 +452,6 @@ const Container = styled.div`
     .navbar-small {
       align-items: flex-end;
       width: 50%;
-
-
 
       .invisible-until-small {
         display: block;

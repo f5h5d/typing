@@ -232,7 +232,7 @@ const PreRaceTimer = styled.div`
   }
 `
 const Container = styled.div`
-  height: 100vh;
+  max-height: inherit;
   width: 100vw;
   display: flex;
   justify-content: space-around;
