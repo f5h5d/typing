@@ -5,7 +5,8 @@ import { setIsMultiplayer } from "../redux/multiplayerSlice";
 import { socket } from "../Socket";
 import MainTypingGame from "../components/generalTyping/MainTypingGame";
 import { setRoomID } from "../redux/multiplayerSlice";
-import { GAME_MODES } from "../constants";
+import { GAME_MODES, PAGES, TYPING_TYPE } from "../constants";
+import { setCurrentPage } from "../redux/userSlice";
 
 const Multiplayer = () => {
 
@@ -39,6 +40,8 @@ const Multiplayer = () => {
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
     dispatch(setTypingMode(GAME_MODES.MULTIPLAYER))
+
+    dispatch(setCurrentPage(typingType == TYPING_TYPE.QUOTES ? PAGES.QUOTE : PAGES.DICTIONARY));
   }, [])
 
   useEffect(() => {

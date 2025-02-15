@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedLength, setTypingType, setTypingText, reset,setTypingBackgroundInfo, setTotalTime, setSelectedDifficulty, setCurrentSelection, setRefillTypingText } from "../../redux/typingSlice";
 import axios from "axios"
@@ -9,7 +9,7 @@ import { API } from "../../constants"
 
 
 
-const OptionSelector = ({ typingRef }) => {
+const OptionSelector = ({ typingRef = useRef(null) }) => {
   const dispatch = useDispatch();
   const selectedLength = useSelector((state) => state.typing.selectedLength);
   const typingType = useSelector((state) => state.typing.typingType);
@@ -18,7 +18,6 @@ const OptionSelector = ({ typingRef }) => {
   const selectedDifficulty = useSelector((state) => state.typing.selectedDifficulty)
   const refillTypingText = useSelector((state) => state.typing.refillTypingText);
   const typingText = useSelector((state) => state.typing.typingText)
-
 
   useEffect(() => { // for text lengths!
     let minLength;
@@ -72,7 +71,7 @@ const OptionSelector = ({ typingRef }) => {
       console.log(response)
       dispatch(setTypingBackgroundInfo(response.data))
       dispatch(reset())
-      typingRef.current.value = ""
+      if (typingRef.current != null) typingRef.current.value = ""
       dispatch(setTypingText(response.data.quote))
     }
     )
@@ -87,7 +86,9 @@ const OptionSelector = ({ typingRef }) => {
       } else {
         dispatch(setTypingBackgroundInfo({content: response.data.words, author: "Google"}))
         dispatch(reset())
-        typingRef.current.value = ""
+
+        console.log();
+        if (typingRef.current != null) typingRef.current.value = "" // for private room there is no typing area yet so no need
         dispatch(setTypingText(response.data.words))
       }
 
@@ -115,7 +116,7 @@ const OptionSelector = ({ typingRef }) => {
   let buttonsToLoad = []
 
   if (currentSelection == 0) {
-    buttonsToLoad = ["Quote", "Words"]
+    buttonsToLoad = ["Quote", "Dictionary"]
   } 
   else if (currentSelection == 1) {
     if (typingType == 0) { // quotes
@@ -167,8 +168,8 @@ const OptionsDiv = styled.div`
   height: 30px;
 
   .option-button {
-    border: 1px solid ${({ theme: { colors } }) => colors.blue};
-    background: ${({ theme: { colors } }) => colors.blue};
+    border: 1px solid ${({ theme: { colors } }) => colors.accent};
+    background: ${({ theme: { colors } }) => colors.accent};
     opacity: 0.5;
     width: 100px;
     height: 30px;

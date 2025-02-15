@@ -52,32 +52,37 @@ const lightTheme = {
 
 const darkTheme = {
   colors: {
-    background : "#121212",
-    mediumBackground: "#161515",
+    mainBackground : "#121212",
     lightBackground: "#242424",
+    mediumBackground: "#161515",
     darkBackground: "#0a0a0a",
-    text: '#dfebf8',
+    accent: "#007BFF",
     textDark: "#36424f",
-    blue: '#007BFF',
-    orange: '#FFA500',
-    green: "#4CAF50",
-    purple: "#8A2BE2",
+    text: '#ffffff',
     red: "#FF4D4D",
-    white: '#FFFFFF',
-    black: "#000",
-    gray: '#E5E7EB',
-    darkGray: '#111827',
-    sidebar: "#1f1e1e",
-    sidebarHover: "#0a0a0a",
-    sidebarBorder: '#000',
-    trophy: "#FFD700",
-    trophyBackground: "#b09709"
+    win: "#FFD700",
   },
-  fonts: ["sans-serif", "Roboto"],
+  fonts: ["Rubik", "JetBrains Mono"],
   fontSizes: {
-    small: "1em",
-    medium: "2em",
-    large: "3em"
+    typingText: "1rem",
+    label: "1rem",
+    largeLabel: "2rem",
+    logo: {
+      default: "2.4rem",
+      sm: "2rem"
+    },
+    text: "0.75rem",
+    navIcons: "0.9rem",
+    mainText: {
+      default: "5rem",
+      md: "4rem",
+    },
+  },
+  breakpoints: {
+    xs: "480px",
+    sm: "768px",
+    md: "1024px",
+    lg: "1440px",
   }
 };
 

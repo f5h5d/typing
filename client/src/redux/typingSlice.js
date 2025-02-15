@@ -11,7 +11,7 @@ const initialState = {
   mouseX: 0,
   wordsPerLine: [0], // each index represents a line, showing how many words in each => start at -1 because of just how it starts cba to fix it
   selectedLength: 0,
-  typingType: 1, // this is for type as in either quotes or words
+  typingType: 0, // this is for type as in either quotes or words
   selectedDifficulty: 1,
   currentSelection: 0, // 0 is type, 1 is length, 2 is difficulty
   wpm: 0,

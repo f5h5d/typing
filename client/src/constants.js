@@ -13,5 +13,13 @@ export const TYPING_TYPE = {
   WORDS: 1
 }
 
+export const PAGES = {
+  HOME: 0,
+  QUOTE: 1,
+  DICTIONARY: 2,
+  PRIVATE: 3,
+  SANDBOX: 4,
+}
+
 export const GUEST_USER_DEFAULT_WPM = 40
 

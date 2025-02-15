@@ -8,7 +8,8 @@ import PrivateLobby from '../components/privateRace/PrivateLobby'
 import { setHasRaceStarted, setIsMultiplayer } from '../redux/multiplayerSlice'
 import { reset, setTypingMode } from '../redux/typingSlice'
 import { setStartPrivateGame } from '../redux/privateSlice'
-import { GAME_MODES } from '../constants'
+import { GAME_MODES, PAGES } from '../constants'
+import { setCurrentPage } from '../redux/userSlice'
 
 
 const PrivateRace = () => {
@@ -28,6 +29,7 @@ const PrivateRace = () => {
   useEffect(() => {
     dispatch(setIsMultiplayer(true));
     dispatch(setTypingMode(GAME_MODES.PRIVATE))
+    dispatch(setCurrentPage(PAGES.PRIVATE));
   }, [])
 
   useEffect(() => {
@@ -38,7 +40,6 @@ const PrivateRace = () => {
     }
 
     const onStartNewPrivateGame = () => {
-      console.log("just so I feel less insane")
       dispatch(reset())
       dispatch(setHasRaceStarted(false));
     }

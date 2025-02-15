@@ -7,6 +7,7 @@ import { setRoomID } from '../../redux/multiplayerSlice'
 import styled from "styled-components"
 import { socket } from '../../Socket'
 import JoinRoomModal from './JoinRoomModal'
+import CornerButton from '../styles/CornerButton'
 
 
 const PrivateLobbyChooser = () => {
@@ -62,10 +63,36 @@ const PrivateLobbyChooser = () => {
       socket.off("created_room", onCreatedRoom);
     }
   }, [socket, dispatch])
+
+
+  const onRoomIDChange = (e) => {
+    if (e.target.value.length > 6) {
+      e.target.value = e.target.value.slice(0, 6)
+    }
+    id = e.target.value
+  }
+
   return (
     <>
     <Container>
-      {joiningRoom ? <JoinRoomModal /> : ""}
+
+      <div className="modal">
+        <h2 className="title">Enter Room Code</h2>
+
+        <input className="input" onChange={(e) => onRoomIDChange(e)}/>
+
+        <div className="buttons-container">
+          <CornerButton><button className="corner-button"><span>JOIN ROOM</span></button></CornerButton>
+          <div className="or-container">
+            <div className="before-line"></div>
+            <span className="text">or</span>
+            <div className="after-line"></div>
+          </div>
+
+          <CornerButton onClick={onCreateRoom}><button className="corner-button" ><span>CREATE ROOM</span></button></CornerButton>
+        </div>
+      </div>
+      {/* {joiningRoom ? <JoinRoomModal /> : ""}
       <Option>
         <div className="content-container" onClick={onCreateRoom}>
         <FontAwesomeIcon className="icon" icon={faPlus} />
@@ -77,7 +104,10 @@ const PrivateLobbyChooser = () => {
           <FontAwesomeIcon className="icon" icon={faMagnifyingGlass} />
           <div className="text">Join Room</div>
         </div>
-      </Option>
+      </Option> */}
+
+
+
     </Container>
     </>
   )
@@ -87,51 +117,76 @@ export default PrivateLobbyChooser
 
 
 const Container = styled.div`
-  height: 100vh;
   width: 100vw;
 
   display: flex;
   justify-content: center;
-  align-items: center;
-
-`
-
-const Option = styled.div`
-  height: 200px;
-  width: 200px;
-  margin: 100px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 
 
-
-  .content-container {
-    height: 100%;
-    width: 100%;
-    background: ${({ theme: { colors } }) => colors.lightBackground};
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  .modal {
+    margin-top: 100px;
+    height: 465px;
+    width: 450px;
     border-radius: 10px;
-    transition: 0.2s linear;
-    cursor: pointer;
-  }
+    background: ${props => props.theme.colors.lightBackground};
 
-  .content-container:hover {
-    transform: scale(1.1)
-  }
+    .title {
+      font-size: ${props => props.theme.fontSizes.largeLabel};
+      text-align: center;
+      margin-top: 50px;
+    }
 
-  .text {
-    font-size: 25px;
-  }
-  .icon {
-    color: ${({ theme: { colors } }) => colors.blue};
-    font-size: 35px;
-  }
+    .input {
+      background: ${props => props.theme.colors.darkBackground};
+      width: 90%;
+      margin-left: 5%;
+      margin-top: 40px;
+      margin-bottom: 5%;
+      height: 60px;
+      border-bottom: 5px solid ${props => props.theme.colors.accent};
+      border-radius: 2px;
 
+      font-size: ${props => props.theme.fontSizes.largeLabel};
+      color: ${props => props.theme.colors.text};
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .buttons-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+
+    .or-container {
+
+      display: flex;
+
+      width: 100%;
+      height: 20px;
+      justify-content: space-evenly;
+      align-items: center;
+
+      /* position: relative; */
+      .before-line, .after-line {
+        height: 2px;
+        border-radius: 10px;
+        width: 40%;
+        background: ${props => props.theme.colors.accent};
+        /* position: absolute; */
+      }
+
+      .before-line {
+
+      }
+    }
+
+    }
+    .corner-button {
+      margin: 15% 0px;
+
+    }
+  }
 
 `
